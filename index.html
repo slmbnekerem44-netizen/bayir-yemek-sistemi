@@ -11,7 +11,7 @@
       --primary: #6366f1;
       --primary-hover: #4f46e5;
       --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.85);
+      --card-bg: rgba(30, 41, 59, 0.90);
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --input-bg: rgba(15, 23, 42, 0.8);
@@ -37,35 +37,35 @@
       position: relative;
     }
 
-    /* Bol ve Hızlı Kalpler (En Ön Katman) */
+    /* Kalpler Artık Sadece Yan Kenarlarda Akıyor (Panellerin Üstünü Kapatmaz) */
     .floating-hearts {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none;
-      z-index: 9999;
+      z-index: 1;
       overflow: hidden;
     }
     .heart {
       position: absolute;
       color: #ef4444;
-      font-size: 26px;
-      animation: flyUp 3.5s linear infinite;
-      text-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+      font-size: 24px;
+      animation: flyUp 4s linear infinite;
+      opacity: 0.7;
     }
     @keyframes flyUp {
-      0% { transform: translateY(105vh) scale(0.4) rotate(0deg); opacity: 0; }
-      15% { opacity: 1; }
-      85% { opacity: 1; }
-      100% { transform: translateY(-10vh) scale(1.6) rotate(360deg); opacity: 0; }
+      0% { transform: translateY(105vh) scale(0.5); opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.3); opacity: 0; }
     }
 
     .container {
-      width: 100%; max-width: 440px; padding: 16px; z-index: 2; position: relative;
+      width: 100%; max-width: 440px; padding: 16px; z-index: 10; position: relative;
     }
 
     .card {
       width: 100%; background: var(--card-bg); padding: 24px;
-      border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
       border: 1px solid var(--border-color); backdrop-filter: blur(12px);
       text-align: center;
     }
@@ -91,7 +91,7 @@
     .hidden { display: none !important; }
 
     .poll-card {
-      background: rgba(0, 0, 0, 0.25); border-radius: 16px; padding: 16px;
+      background: rgba(0, 0, 0, 0.3); border-radius: 16px; padding: 16px;
       margin-bottom: 16px; border: 1px solid var(--border-color); text-align: left;
     }
 
@@ -104,7 +104,7 @@
 
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg);
-      border-top: 1px solid var(--border-color); display: flex; backdrop-filter: blur(12px); z-index: 1000;
+      border-top: 1px solid var(--border-color); display: flex; backdrop-filter: blur(12px); z-index: 100;
     }
     .nav-item {
       flex: 1; padding: 14px; text-align: center; background: transparent; border: none;
@@ -115,7 +115,7 @@
 </head>
 <body>
 
-  <!-- Bol ve Hızlı Kalpler -->
+  <!-- Yan Kenarlardan Uçuşan Kalpler -->
   <div class="floating-hearts" id="heartContainer"></div>
 
   <div class="container">
@@ -187,20 +187,26 @@
   </div>
 
   <script>
-    // Çoklu ve Hızlı Kalp Üretici (Sıklaştırıldı)
+    // Kalpleri Sadece Yan Kenarlara (Sol ve Sağ Boşluklara) Dağıtan Fonksiyon
     function createHeart() {
       const container = document.getElementById('heartContainer');
       if (!container) return;
       const heart = document.createElement('div');
       heart.className = 'heart';
       heart.innerHTML = '❤️';
-      heart.style.left = Math.random() * 95 + 'vw';
-      heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
-      heart.style.fontSize = (Math.random() * 16 + 18) + 'px';
+      
+      // Ekranın ortasındaki kartı (440px) pas geçip sadece sağ ve soldan akması için:
+      const side = Math.random() > 0.5;
+      const posX = side ? (Math.random() * 22) : (78 + Math.random() * 20); // Ya sol %0-22 ya sağ %78-98
+      
+      heart.style.left = posX + 'vw';
+      heart.style.animationDuration = (Math.random() * 2.5 + 2.5) + 's';
+      heart.style.fontSize = (Math.random() * 14 + 16) + 'px';
+      
       container.appendChild(heart);
-      setTimeout(() => heart.remove(), 4000);
+      setTimeout(() => heart.remove(), 5000);
     }
-    setInterval(createHeart, 150); // Her 150 milisaniyede bir kalp fırlatır
+    setInterval(createHeart, 250);
 
     const SUPABASE_URL = 'https://vcjrivgycetdjlporarj.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fzLprz7OMs8hCJC4l-qmAw_gSBTcL-b';
@@ -260,22 +266,26 @@
       if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
 
       btn.disabled = true;
-      status.innerText = "⏳ Fiş taranıyor, sert temizlik devrede...";
+      status.innerText = "⏳ Fiş taranıyor, çöp karakterler ve market adları temizleniyor...";
 
       try {
         const file = fileInput.files[0];
         const result = await Tesseract.recognize(file, 'tur');
         const tumSatirlar = result.data.text.split('\n');
 
-        // Sıkı Gıda ve Malzeme Beyaz Listesi
+        // Kesin Gıda ve Malzeme Beyaz Listesi
         const gidaKelimeleri = [
           'SÜT', 'YUMURTA', 'EKMEK', 'PEYNİR', 'PEYNIR', 'ET', 'TAVUK', 'KİYMA', 'KIYMA', 
           'DOMATES', 'BİBER', 'BIBER', 'PATATES', 'SOĞAN', 'SOGAN', 'MAKARNA', 'PİRİNÇ', 'PIRINC', 
           'ŞEKER', 'SEKER', 'UN', 'YAĞ', 'YAG', 'ZEYTİN', 'ZEYTIN', 'ÇAY', 'CAY', 'KAHVE', 
           'SU', 'YOĞURT', 'YOGURT', 'TERAYAĞ', 'TERAYAG', 'SALÇA', 'SALCA', 'MERCİMEK', 'MERCIMEK',
           'FINISH', 'ARKO', 'OZMO', 'KETÇAP', 'KETCAP', 'MAYONEZ', 'BULAŞIK', 'BULASIK',
-          'ÇAMAŞIR', 'CAMASIR', 'DEREOTİ', 'MAYDANOZ', 'LİMON', 'LIMON', 'MUZ', 'ELMA', 'PORTAKAL'
+          'ÇAMAŞIR', 'CAMASIR', 'DEREOTİ', 'MAYDANOZ', 'LİMON', 'LIMON', 'MUZ', 'ELMA', 'PORTAKAL',
+          'PİLİÇ', 'PILIC', 'BAGET', 'DANA', 'MACA'
         ];
+
+        // Tamamen atılacak çöp kelimeler (Market isimleri, fiş başlıkları vb.)
+        const copKelimeler = ['ŞOK', 'A101', 'MİGROS', 'BIM', 'MARKET', 'TÜN', 'AE', 'TL', 'POS', 'TARIH', 'SAAT'];
 
         const filtrelenmisUrunler = [];
 
@@ -284,7 +294,6 @@
           let ust = temiz.toUpperCase();
 
           if (temiz.length < 3) return;
-          // Eğer içinde sayı, kg, lt gibi bozuk ifadeler veya işaretler tek başına kaldıysa direkt ele
           if (/^[\d\s\.,<>:\-\/]+$/.test(temiz)) return;
 
           let eslesti = false;
@@ -296,9 +305,15 @@
           }
 
           if (eslesti) {
+            // Çöp kelimeleri, tireleri, özel simgeleri ve sayı kalıntılarını tamamen temizle
+            copKelimeler.forEach(cop => {
+              ust = ust.replace(new RegExp(cop, 'g'), '');
+            });
+
             let temizUrun = ust
-              .replace(/\d+[\.,]\d+\s*(KG|GR|LT|ML|X)?/gi, '')
-              .replace(/[\d\.,<>:\-\/]+/g, '')
+              .replace(/[—–\-*&|+\\|"«»\(\)]/g, '') // Tüm tire ve sembolleri sil
+              .replace(/\d+[\.,]\d+\s*(KG|GR|LT|ML|X)?/gi, '') // Gramaj/Fiyatları sil
+              .replace(/[\d\.,<>:\-\/]+/g, '') // Kalan sayıları sil
               .trim();
 
             if (temizUrun.length > 2) {
@@ -310,7 +325,7 @@
         const benzersizUrunler = [...new Set(filtrelenmisUrunler)];
 
         if (benzersizUrunler.length === 0) {
-          status.innerText = "⚠️ Fişte eşleşen temiz ürün bulunamadı. Elle malzeme ekleyebilirsin.";
+          status.innerText = "⚠️ Fişte net ürün bulunamadı. Elle malzeme ekleyebilirsin.";
           btn.disabled = false;
           return;
         }
@@ -325,7 +340,7 @@
         if (error) {
           status.innerText = "❌ Hata: " + error.message;
         } else {
-          status.innerText = `✅ ${benzersizUrunler.length} adet temiz ürün dolaba eklendi!`;
+          status.innerText = `✅ ${benzersizUrunler.length} adet saf ürün dolaba eklendi!`;
           dolapGetir();
           tarifleriGetir();
         }
