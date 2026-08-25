@@ -218,7 +218,7 @@
       if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
 
       btn.disabled = true;
-      status.innerText = "⏳ Yapay zeka fişi tarıyor ve gereksiz bilgileri ayıklıyor...";
+      status.innerText = "⏳ Fiş taranıyor ve çöpler temizleniyor...";
 
       try {
         const file = fileInput.files[0];
@@ -229,27 +229,32 @@
         const engellenenler = [
           'POŞET', 'POS ET', 'TARİH', 'TARIH', 'SAAT', 'FİŞ NO', 'FIS NO', 
           'TOPKDV', 'TOPLAM', 'MARKET', 'TİC', 'VERGİ', 'V.D', 'ANADOLU', 
-          'KDV', 'NAKİT', 'KREDİ', 'PARA', 'PARA ÜSTÜ', 'TL', 'SIRA NO'
+          'KDV', 'NAKİT', 'KREDİ', 'PARA', 'PARA ÜSTÜ', 'TL', 'SIRA NO',
+          'MAMAK', 'ANKARA', 'İSTANBUL', 'ARK KDV', 'BİLGİ', 'FİŞ', 'TOP'
         ];
 
         const filtrelenmisUrunler = tumSatirlar.map(s => s.trim()).filter(satir => {
-          if (satir.length < 3) return false;
+          if (satir.length < 4) return false;
           const ust = satir.toUpperCase();
 
           if (engellenenler.some(kelime => ust.includes(kelime))) return false;
-          if (/^\d{2}[\/\.]\d{2}[\/\.]\d{4}/.test(satir)) return false; 
+          if (/\d{1,2}[\/\.]\d{1,2}/.test(satir)) return false; 
+          if (/\d{1,2}:\d{2}/.test(satir)) return false; 
+          if (/kg\s*x/i.test(satir)) return false; 
           if (/^[\d\s\.,:\-]+$/.test(satir)) return false; 
 
           return true;
         }).map(urun => {
           return urun
+            .replace(/—.*$/, '')
+            .replace(/[*&%+“"«»|]/g, '')
             .replace(/[\d\.,"'\-–—&*]+\s*$/, '')
             .replace(/\s+x\d+.*$/i, '')
             .trim();
-        }).filter(urun => urun.length > 2);
+        }).filter(urun => urun.length > 3);
 
         if (filtrelenmisUrunler.length === 0) {
-          status.innerText = "⚠️ Fişten geçerli bir ürün adı okunamadı.";
+          status.innerText = "⚠️ Fişten net ürün adı okunamadı, daha düzgün çekip tekrar dene.";
           btn.disabled = false;
           return;
         }
@@ -262,16 +267,14 @@
         const { error } = await _supabase.from('dolaptakiler').insert(eklenecekler);
 
         if (error) {
-          console.error("Supabase Ekleme Hatası:", error);
-          status.innerText = "❌ Veritabanına eklenirken hata oluştu: " + error.message;
+          status.innerText = "❌ Hata: " + error.message;
         } else {
-          status.innerText = `✅ ${filtrelenmisUrunler.length} adet ürün temizlenerek dolaba eklendi!`;
+          status.innerText = `✅ ${filtrelenmisUrunler.length} adet geçerli ürün dolaba eklendi!`;
           dolapGetir();
           tarifleriGetir();
         }
 
       } catch (e) {
-        console.error("OCR Hatası:", e);
         status.innerText = "❌ Okuma hatası oluştu.";
       } finally {
         btn.disabled = false;
@@ -392,6 +395,7 @@
       const val = document.getElementById('mainFood').value.trim();
       if (!val) return;
       await _supabase.from('yemek_secimi').insert([{ onerilen_yemek: val, oneren_kisi: aktifKullanici, durum: 'Oylanıyor' }]);
+      document.getElementById('mainFood5') // Düzeltilmiş alan
       document.getElementById('mainFood').value = '';
       oylamaGetir();
     }
