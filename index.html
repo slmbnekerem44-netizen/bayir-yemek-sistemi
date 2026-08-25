@@ -120,14 +120,14 @@
       </div>
 
       <div id="tabTarifler" class="hidden">
-        <h3>🧾 Fiş Ürünlerini Ekle</h3>
-        <p style="font-size:12px; color:var(--text-muted); text-align:left; margin-top:0;">
-          Fiş fotoğrafını bana (sohbete) at, sana tertemiz ürün listesini vereyim. Aşağıya virgülle ayırarak tek tıkla ekle!
-        </p>
-        
-        <div style="text-align:left;">
-          <label style="font-size:12px; color:var(--text-muted);">Ürünler (Virgülle Ayırarak):</label>
-          <input type="text" id="manuelMalzeme" placeholder="Örn: SÜT, YUMURTA, TAVUK BAGET">
+        <h3>📸 Fiş Fotoğrafı Okut</h3>
+        <input type="file" id="fisInput" accept="image/*">
+        <button class="action-btn" id="btnOcr" onclick="fisOkuAI()">🧾 Fişi Yapay Zeka ile Oku</button>
+        <div id="ocrStatus" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></div>
+
+        <div style="margin-top:14px; text-align:left;">
+          <label style="font-size:12px; color:var(--text-muted);">Elle Malzeme Ekle (Virgülle Ayır):</label>
+          <input type="text" id="manuelMalzeme" placeholder="Örn: Süt, Yumurta, Domates">
           <button class="action-btn btn-green" onclick="manuelMalzemeEkle()">Dolaba Ekle</button>
         </div>
 
@@ -162,6 +162,8 @@
     const SUPABASE_URL = 'https://vcjrivgycetdjlporarj.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fzLprz7OMs8hCJC4l-qmAw_gSBTcL-b';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const GEMINI_API_KEY = "AQ.Ab8RN6LE4ezZdSsGOS7GG_RM2vgNz5sd_A4Mi8l_CeaE4P7I5g"; 
 
     const SIFRELER = { "Baba": "1234", "Anne": "1234", "Kerem": "1234", "Abi": "1234" };
     let aktifKullanici = localStorage.getItem('bayir_user') || null;
@@ -206,6 +208,78 @@
         document.getElementById('tabTarifler').classList.remove('hidden');
         document.getElementById('btnTabOylama').classList.remove('active');
         document.getElementById('btnTabTarifler').classList.add('active');
+      }
+    }
+
+    async function fisOkuAI() {
+      const fileInput = document.getElementById('fisInput');
+      const status = document.getElementById('ocrStatus');
+      const btn = document.getElementById('btnOcr');
+
+      if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
+
+      btn.disabled = true;
+      status.innerText = "🤖 Yapay zeka fişi inceliyor, çöpleri temizliyor...";
+
+      try {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = async () => {
+          const base64Data = reader.result.split(',')[1];
+          const mimeType = file.type;
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: "Bu market fişindeki satın alınan gıda, içecek ve temizlik ürünlerini bul. Market adlarını, fiş başlıklarını, fiyatları, gramajları, barkodları ve tire/özel karakterleri kesinlikle ayıkla. Sadece saf ürün isimlerini büyük harfle ver ve cevabı sadece aralarına virgül koyarak yaz (Örnek format: SÜT,YUMURTA,FINISH,TAVUK). Başka hiçbir açıklama yazma." },
+                  { inline_data: { mime_type: mimeType, data: base64Data } }
+                ]
+              }]
+            })
+          });
+
+          const resJson = await response.json();
+          const aiText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (!aiText) {
+            status.innerText = "❌ Fiş okunamadı, tekrar dene.";
+            btn.disabled = false;
+            return;
+          }
+
+          const urunler = aiText.split(',').map(u => u.trim()).filter(u => u.length > 0);
+
+          if (urunler.length === 0) {
+            status.innerText = "⚠️ Fişte uygun ürün bulunamadı.";
+            btn.disabled = false;
+            return;
+          }
+
+          const eklenecekler = urunler.map(urun => ({
+            malzeme_adi: urun.toUpperCase(),
+            ekleyen_kisi: aktifKullanici
+          }));
+
+          const { error } = await _supabase.from('dolaptakiler').insert(eklenecekler);
+
+          if (error) {
+            status.innerText = "❌ Hata: " + error.message;
+          } else {
+            status.innerText = `✅ ${urunler.length} ürün yapay zeka ile dolaba eklendi!`;
+            fileInput.value = '';
+            dolapGetir();
+            tarifleriGetir();
+          }
+          btn.disabled = false;
+        };
+      } catch (e) {
+        status.innerText = "❌ Bağlantı hatası oluştu.";
+        btn.disabled = false;
       }
     }
 
@@ -282,7 +356,7 @@
       const { data: tarifler } = await _supabase.from('tarifler').select('*');
       const area = document.getElementById('tariflerListesi');
 
-      if (!tarifler || tarifler.length === 0)  {
+      if (!tarifler || tarifler.length === 0) {
         area.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Henüz kayıtlı tarif yok.</p>";
         return;
       }
