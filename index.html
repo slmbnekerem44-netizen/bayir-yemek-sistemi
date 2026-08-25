@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bayır Ailesi Yemek & Tarif Sistemi</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     :root {
       --primary: #6366f1;
       --primary-hover: #4f46e5;
       --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.90);
+      --card-bg: rgba(30, 41, 59, 0.95);
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --input-bg: rgba(15, 23, 42, 0.8);
@@ -33,30 +32,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Kalpler Artık Sadece Yan Kenarlarda Akıyor (Panellerin Üstünü Kapatmaz) */
-    .floating-hearts {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 1;
-      overflow: hidden;
-    }
-    .heart {
-      position: absolute;
-      color: #ef4444;
-      font-size: 24px;
-      animation: flyUp 4s linear infinite;
-      opacity: 0.7;
-    }
-    @keyframes flyUp {
-      0% { transform: translateY(105vh) scale(0.5); opacity: 0; }
-      20% { opacity: 0.8; }
-      80% { opacity: 0.8; }
-      100% { transform: translateY(-10vh) scale(1.3); opacity: 0; }
     }
 
     .container {
@@ -115,9 +90,6 @@
 </head>
 <body>
 
-  <!-- Yan Kenarlardan Uçuşan Kalpler -->
-  <div class="floating-hearts" id="heartContainer"></div>
-
   <div class="container">
     <div id="loginScreen" class="card">
       <h2>❤️ Bayır Ailesi Girişi</h2>
@@ -150,7 +122,7 @@
       <div id="tabTarifler" class="hidden">
         <h3>📸 Fiş Fotoğrafı Okut</h3>
         <input type="file" id="fisInput" accept="image/*">
-        <button class="action-btn" id="btnOcr" onclick="fisOku()">🧾 Fişi Okut ve Dolaba Ekle</button>
+        <button class="action-btn" id="btnOcr" onclick="fisOkuAI()">🧾 Fişi Yapay Zeka ile Oku</button>
         <div id="ocrStatus" style="font-size:12px; color:var(--text-muted); margin-top:6px;"></div>
 
         <div style="margin-top:14px; text-align:left;">
@@ -187,27 +159,6 @@
   </div>
 
   <script>
-    // Kalpleri Sadece Yan Kenarlara (Sol ve Sağ Boşluklara) Dağıtan Fonksiyon
-    function createHeart() {
-      const container = document.getElementById('heartContainer');
-      if (!container) return;
-      const heart = document.createElement('div');
-      heart.className = 'heart';
-      heart.innerHTML = '❤️';
-      
-      // Ekranın ortasındaki kartı (440px) pas geçip sadece sağ ve soldan akması için:
-      const side = Math.random() > 0.5;
-      const posX = side ? (Math.random() * 22) : (78 + Math.random() * 20); // Ya sol %0-22 ya sağ %78-98
-      
-      heart.style.left = posX + 'vw';
-      heart.style.animationDuration = (Math.random() * 2.5 + 2.5) + 's';
-      heart.style.fontSize = (Math.random() * 14 + 16) + 'px';
-      
-      container.appendChild(heart);
-      setTimeout(() => heart.remove(), 5000);
-    }
-    setInterval(createHeart, 250);
-
     const SUPABASE_URL = 'https://vcjrivgycetdjlporarj.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fzLprz7OMs8hCJC4l-qmAw_gSBTcL-b';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -258,7 +209,8 @@
       }
     }
 
-    async function fisOku() {
+    // Fişi Doğrudan Yapay Zekaya (Gemini API) Gönderen Akıllı Fonksiyon
+    async function fisOkuAI() {
       const fileInput = document.getElementById('fisInput');
       const status = document.getElementById('ocrStatus');
       const btn = document.getElementById('btnOcr');
@@ -266,88 +218,78 @@
       if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
 
       btn.disabled = true;
-      status.innerText = "⏳ Fiş taranıyor, çöp karakterler ve market adları temizleniyor...";
+      status.innerText = "🤖 Yapay zeka fişi inceliyor ve ürünleri ayıklıyor...";
 
       try {
         const file = fileInput.files[0];
-        const result = await Tesseract.recognize(file, 'tur');
-        const tumSatirlar = result.data.text.split('\n');
+        
+        // Resmi base64 formatına çevir
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        
+        reader.onload = async () => {
+          const base64Data = reader.result.split(',')[1];
+          const mimeType = file.type;
 
-        // Kesin Gıda ve Malzeme Beyaz Listesi
-        const gidaKelimeleri = [
-          'SÜT', 'YUMURTA', 'EKMEK', 'PEYNİR', 'PEYNIR', 'ET', 'TAVUK', 'KİYMA', 'KIYMA', 
-          'DOMATES', 'BİBER', 'BIBER', 'PATATES', 'SOĞAN', 'SOGAN', 'MAKARNA', 'PİRİNÇ', 'PIRINC', 
-          'ŞEKER', 'SEKER', 'UN', 'YAĞ', 'YAG', 'ZEYTİN', 'ZEYTIN', 'ÇAY', 'CAY', 'KAHVE', 
-          'SU', 'YOĞURT', 'YOGURT', 'TERAYAĞ', 'TERAYAG', 'SALÇA', 'SALCA', 'MERCİMEK', 'MERCIMEK',
-          'FINISH', 'ARKO', 'OZMO', 'KETÇAP', 'KETCAP', 'MAYONEZ', 'BULAŞIK', 'BULASIK',
-          'ÇAMAŞIR', 'CAMASIR', 'DEREOTİ', 'MAYDANOZ', 'LİMON', 'LIMON', 'MUZ', 'ELMA', 'PORTAKAL',
-          'PİLİÇ', 'PILIC', 'BAGET', 'DANA', 'MACA'
-        ];
-
-        // Tamamen atılacak çöp kelimeler (Market isimleri, fiş başlıkları vb.)
-        const copKelimeler = ['ŞOK', 'A101', 'MİGROS', 'BIM', 'MARKET', 'TÜN', 'AE', 'TL', 'POS', 'TARIH', 'SAAT'];
-
-        const filtrelenmisUrunler = [];
-
-        tumSatirlar.forEach(satir => {
-          let temiz = satir.trim();
-          let ust = temiz.toUpperCase();
-
-          if (temiz.length < 3) return;
-          if (/^[\d\s\.,<>:\-\/]+$/.test(temiz)) return;
-
-          let eslesti = false;
-          for (let kelime of gidaKelimeleri) {
-            if (ust.includes(kelime)) {
-              eslesti = true;
-              break;
-            }
+          // Buraya kendi Gemini API anahtarını ekleyebilirsin veya proxy üzerinden çalıştırabilirsin
+          // Şimdilik tarayıcı üzerinden doğrudan Google Generative Language API'sine istek atıyoruz:
+          const apiKey = ""; // Kendi Gemini API key'ini buraya yapıştırabilirsin
+          
+          if(!apiKey) {
+            status.innerText = "⚠️ Lütfen koda Gemini API anahtarını ekle!";
+            btn.disabled = false;
+            return;
           }
 
-          if (eslesti) {
-            // Çöp kelimeleri, tireleri, özel simgeleri ve sayı kalıntılarını tamamen temizle
-            copKelimeler.forEach(cop => {
-              ust = ust.replace(new RegExp(cop, 'g'), '');
-            });
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: "Bu market fişindeki satın alınan gıda, temizlik ve ev ürünlerini bul. Market adlarını, fiyatları, gramajları, barkodları ve tire/özel karakterleri tamamen at. Sadece saf ürün isimlerini büyük harfle ver ve cevabı sadece aralarına virgül koyarak yaz (Örn: SÜT,YUMURTA,FINISH,TAVUK BAGET). Başka hiçbir açıklama yazma." },
+                  { inline_data: { mime_type: mimeType, data: base64Data } }
+                ]
+              }]
+            })
+          });
 
-            let temizUrun = ust
-              .replace(/[—–\-*&|+\\|"«»\(\)]/g, '') // Tüm tire ve sembolleri sil
-              .replace(/\d+[\.,]\d+\s*(KG|GR|LT|ML|X)?/gi, '') // Gramaj/Fiyatları sil
-              .replace(/[\d\.,<>:\-\/]+/g, '') // Kalan sayıları sil
-              .trim();
+          const resJson = await response.json();
+          const aiText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
 
-            if (temizUrun.length > 2) {
-              filtrelenmisUrunler.push(temizUrun);
-            }
+          if (!aiText) {
+            status.innerText = "❌ Yapay zeka fişi okuyamadı.";
+            btn.disabled = false;
+            return;
           }
-        });
 
-        const benzersizUrunler = [...new Set(filtrelenmisUrunler)];
+          const urunler = aiText.split(',').map(u => u.trim()).filter(u => u.length > 0);
 
-        if (benzersizUrunler.length === 0) {
-          status.innerText = "⚠️ Fişte net ürün bulunamadı. Elle malzeme ekleyebilirsin.";
+          if (urunler.length === 0) {
+            status.innerText = "⚠️ Fişte uygun ürün bulunamadı.";
+            btn.disabled = false;
+            return;
+          }
+
+          const eklenecekler = urunler.map(urun => ({
+            malzeme_adi: urun.toUpperCase(),
+            ekleyen_kisi: aktifKullanici
+          }));
+
+          const { error } = await _supabase.from('dolaptakiler').insert(eklenecekler);
+
+          if (error) {
+            status.innerText = "❌ Hata: " + error.message;
+          } else {
+            status.innerText = `✅ ${urunler.length} adet ürün yapay zeka ile tertemiz eklendi!`;
+            dolapGetir();
+            tarifleriGetir();
+          }
           btn.disabled = false;
-          return;
-        }
-
-        const eklenecekler = benzersizUrunler.map(urun => ({
-          malzeme_adi: urun,
-          ekleyen_kisi: aktifKullanici
-        }));
-
-        const { error } = await _supabase.from('dolaptakiler').insert(eklenecekler);
-
-        if (error) {
-          status.innerText = "❌ Hata: " + error.message;
-        } else {
-          status.innerText = `✅ ${benzersizUrunler.length} adet saf ürün dolaba eklendi!`;
-          dolapGetir();
-          tarifleriGetir();
-        }
+        };
 
       } catch (e) {
-        status.innerText = "❌ Okuma hatası oluştu.";
-      } finally {
+        status.innerText = "❌ Bağlantı hatası oluştu.";
         btn.disabled = false;
       }
     }
