@@ -33,6 +33,28 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Hareketli Kalpler Arka Plan Efekti */
+    .floating-hearts {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .heart {
+      position: absolute;
+      color: rgba(239, 68, 68, 0.4);
+      font-size: 20px;
+      animation: flyUp 6s linear infinite;
+    }
+    @keyframes flyUp {
+      0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
+      50% { opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.4); opacity: 0; }
     }
 
     .container {
@@ -90,6 +112,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Hareketli Kalpler Divi -->
+  <div class="floating-hearts" id="heartContainer"></div>
 
   <div class="container">
     <div id="loginScreen" class="card">
@@ -160,6 +185,20 @@
   </div>
 
   <script>
+    // Hareketli Kalp Üretici
+    function createHeart() {
+      const container = document.getElementById('heartContainer');
+      if (!container) return;
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.innerHTML = '❤️';
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+      container.appendChild(heart);
+      setTimeout(() => heart.remove(), 7000);
+    }
+    setInterval(createHeart, 500);
+
     const SUPABASE_URL = 'https://vcjrivgycetdjlporarj.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fzLprz7OMs8hCJC4l-qmAw_gSBTcL-b';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -218,7 +257,7 @@
       if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
 
       btn.disabled = true;
-      status.innerText = "⏳ Fiş taranıyor, çöpler süzülüyor...";
+      status.innerText = "⏳ Fiş taranıyor, sert filtre uygulanıyor...";
 
       try {
         const file = fileInput.files[0];
@@ -226,47 +265,45 @@
         
         const tumSatirlar = result.data.text.split('\n');
 
-        // Çöp ifadeleri yakalamak için genişletilmiş yasaklı listesi
-        const engellenenler = [
+        // Çöp kelimeler engeli
+        const yasakliKelimeler = [
           'POŞET', 'POS', 'TAR', 'ARIH', 'TARIH', 'SAAT', 'SAA', 'FİŞ', 'FIS', 'NO', 
           'TOPKDV', 'TOP', 'MARKET', 'TİC', 'TIC', 'VERGİ', 'VERGI', 'V.D', 'ANADOLU', 
           'KDV', 'NAKİT', 'NAKIT', 'KREDİ', 'KREDI', 'PARA', 'USTU', 'TL', 'SIRA', 
           'MAMAK', 'ANKARA', 'İSTANBUL', 'ISTANBUL', 'BİLGİ', 'BILGI', 'MALI', 'MALİ',
-          'SATIŞ', 'SATIS', 'TOPLAM', 'KASA', 'MUTFAK', 'A.Ş', 'A.S', 'LTD'
+          'SATIŞ', 'SATIS', 'TOPLAM', 'KASA', 'MUTFAK', 'A.Ş', 'A.S', 'LTD', 'M6', 'ARE'
         ];
 
-        const filtrelenmisUrunler = tumSatirlar.map(s => s.trim()).filter(satir => {
-          if (satir.length < 5) return false; // 5 karakterden kısa satırları direkt ele
-          const ust = satir.toUpperCase();
+        const filtrelenmisUrunler = [];
 
-          // İçinde yasaklı kelime geçiyorsa at
-          if (engellenenler.some(kelime => ust.includes(kelime))) return false;
-          
-          // İçinde tarih, saat veya saf sayılar/semboller varsa at
-          if (/\d{1,2}[\/\.-]\d{1,2}/.test(satir)) return false; 
-          if (/\d{1,2}:\d{2}/.test(satir)) return false; 
-          if (/^[\d\s\.,:\-\/]+$/.test(satir)) return false;
+        tumSatirlar.forEach(satir => {
+          let temiz = satir.trim();
+          let ust = temiz.toUpperCase();
 
-          // En az 2 tane harf içermeyen satırları at (saf sayılar kalmasın)
-          const harfSayisi = (ust.match(/[A-ZÇĞİÖŞÜ]/g) || []).length;
-          if (harfSayisi < 3) return false;
+          // Çok kısaysa veya yasaklı kelime içeriyorsa atla
+          if (temiz.length < 4) return;
+          if (yasakliKelimeler.some(y => ust.includes(y))) return;
+          if (/\d{1,2}[\/\.-]\d{1,2}/.test(temiz)) return; 
+          if (/\d{1,2}:\d{2}/.test(temiz)) return; 
+          if (/^[\d\s\.,:\-\/]+$/.test(temiz)) return;
 
-          return true;
-        }).map(urun => {
-          // Ürün adının sağındaki solundaki çöpleri temizle
-          return urun
-            .replace(/—.*$/, '')                 
-            .replace(/[*&%+“"«»|\\()]/g, '')        
+          // Sadece harf ve rakam içeren anlamlı kısımları al
+          temiz = temiz
+            .replace(/—.*$/, '')
+            .replace(/[*&%+“"«»|\\()]/g, '')
             .replace(/[\d\.,"'\-–—&*]+\s*$/, '')
-            .replace(/\s+x\d+.*$/i, '')        
+            .replace(/\s+x\d+.*$/i, '')
             .trim();
-        }).filter(urun => urun.length > 3);
 
-        // Benzersiz yap (aynı üründen iki defa eklemesin)
+          if (temiz.length > 3) {
+            filtrelenmisUrunler.push(temiz);
+          }
+        });
+
         const benzersizUrunler = [...new Set(filtrelenmisUrunler)];
 
         if (benzersizUrunler.length === 0) {
-          status.innerText = "⚠️ Fişten net ürün adı okunamadı. Fotoğrafı daha net çekip tekrar dene.";
+          status.innerText = "⚠️ Fişten net ürün adı bulunamadı. Elle malzeme eklemeyi kullanabilirsin.";
           btn.disabled = false;
           return;
         }
@@ -281,7 +318,7 @@
         if (error) {
           status.innerText = "❌ Hata: " + error.message;
         } else {
-          status.innerText = `✅ ${benzersizUrunler.length} adet saf ürün dolaba eklendi!`;
+          status.innerText = `✅ ${benzersizUrunler.length} adet ürün başarıyla dolaba eklendi!`;
           dolapGetir();
           tarifleriGetir();
         }
