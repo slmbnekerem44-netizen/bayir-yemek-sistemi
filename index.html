@@ -218,7 +218,7 @@
       if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
 
       btn.disabled = true;
-      status.innerText = "⏳ Fiş taranıyor ve çöpler temizleniyor...";
+      status.innerText = "⏳ Fiş taranıyor, çöpler süzülüyor...";
 
       try {
         const file = fileInput.files[0];
@@ -226,40 +226,52 @@
         
         const tumSatirlar = result.data.text.split('\n');
 
+        // Çöp ifadeleri yakalamak için genişletilmiş yasaklı listesi
         const engellenenler = [
-          'POŞET', 'POS ET', 'TARİH', 'TARIH', 'SAAT', 'FİŞ NO', 'FIS NO', 
-          'TOPKDV', 'TOPLAM', 'MARKET', 'TİC', 'VERGİ', 'V.D', 'ANADOLU', 
-          'KDV', 'NAKİT', 'KREDİ', 'PARA', 'PARA ÜSTÜ', 'TL', 'SIRA NO',
-          'MAMAK', 'ANKARA', 'İSTANBUL', 'ARK KDV', 'BİLGİ', 'FİŞ', 'TOP'
+          'POŞET', 'POS', 'TAR', 'ARIH', 'TARIH', 'SAAT', 'SAA', 'FİŞ', 'FIS', 'NO', 
+          'TOPKDV', 'TOP', 'MARKET', 'TİC', 'TIC', 'VERGİ', 'VERGI', 'V.D', 'ANADOLU', 
+          'KDV', 'NAKİT', 'NAKIT', 'KREDİ', 'KREDI', 'PARA', 'USTU', 'TL', 'SIRA', 
+          'MAMAK', 'ANKARA', 'İSTANBUL', 'ISTANBUL', 'BİLGİ', 'BILGI', 'MALI', 'MALİ',
+          'SATIŞ', 'SATIS', 'TOPLAM', 'KASA', 'MUTFAK', 'A.Ş', 'A.S', 'LTD'
         ];
 
         const filtrelenmisUrunler = tumSatirlar.map(s => s.trim()).filter(satir => {
-          if (satir.length < 4) return false;
+          if (satir.length < 5) return false; // 5 karakterden kısa satırları direkt ele
           const ust = satir.toUpperCase();
 
+          // İçinde yasaklı kelime geçiyorsa at
           if (engellenenler.some(kelime => ust.includes(kelime))) return false;
-          if (/\d{1,2}[\/\.]\d{1,2}/.test(satir)) return false; 
+          
+          // İçinde tarih, saat veya saf sayılar/semboller varsa at
+          if (/\d{1,2}[\/\.-]\d{1,2}/.test(satir)) return false; 
           if (/\d{1,2}:\d{2}/.test(satir)) return false; 
-          if (/kg\s*x/i.test(satir)) return false; 
-          if (/^[\d\s\.,:\-]+$/.test(satir)) return false; 
+          if (/^[\d\s\.,:\-\/]+$/.test(satir)) return false;
+
+          // En az 2 tane harf içermeyen satırları at (saf sayılar kalmasın)
+          const harfSayisi = (ust.match(/[A-ZÇĞİÖŞÜ]/g) || []).length;
+          if (harfSayisi < 3) return false;
 
           return true;
         }).map(urun => {
+          // Ürün adının sağındaki solundaki çöpleri temizle
           return urun
-            .replace(/—.*$/, '')
-            .replace(/[*&%+“"«»|]/g, '')
+            .replace(/—.*$/, '')                 
+            .replace(/[*&%+“"«»|\\()]/g, '')        
             .replace(/[\d\.,"'\-–—&*]+\s*$/, '')
-            .replace(/\s+x\d+.*$/i, '')
+            .replace(/\s+x\d+.*$/i, '')        
             .trim();
         }).filter(urun => urun.length > 3);
 
-        if (filtrelenmisUrunler.length === 0) {
-          status.innerText = "⚠️ Fişten net ürün adı okunamadı, daha düzgün çekip tekrar dene.";
+        // Benzersiz yap (aynı üründen iki defa eklemesin)
+        const benzersizUrunler = [...new Set(filtrelenmisUrunler)];
+
+        if (benzersizUrunler.length === 0) {
+          status.innerText = "⚠️ Fişten net ürün adı okunamadı. Fotoğrafı daha net çekip tekrar dene.";
           btn.disabled = false;
           return;
         }
 
-        const eklenecekler = filtrelenmisUrunler.map(urun => ({
+        const eklenecekler = benzersizUrunler.map(urun => ({
           malzeme_adi: urun,
           ekleyen_kisi: aktifKullanici
         }));
@@ -269,7 +281,7 @@
         if (error) {
           status.innerText = "❌ Hata: " + error.message;
         } else {
-          status.innerText = `✅ ${filtrelenmisUrunler.length} adet geçerli ürün dolaba eklendi!`;
+          status.innerText = `✅ ${benzersizUrunler.length} adet saf ürün dolaba eklendi!`;
           dolapGetir();
           tarifleriGetir();
         }
@@ -395,7 +407,6 @@
       const val = document.getElementById('mainFood').value.trim();
       if (!val) return;
       await _supabase.from('yemek_secimi').insert([{ onerilen_yemek: val, oneren_kisi: aktifKullanici, durum: 'Oylanıyor' }]);
-      document.getElementById('mainFood5') // Düzeltilmiş alan
       document.getElementById('mainFood').value = '';
       oylamaGetir();
     }
