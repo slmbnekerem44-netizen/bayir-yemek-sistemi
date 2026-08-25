@@ -1,0 +1,63 @@
+// --- FİŞ OKUMA (OCR) VE DOLAP İŞLEMLERİ ---
+async function fisOku() {
+  const fileInput = document.getElementById('fisInput');
+  const status = document.getElementById('ocrStatus');
+  const btn = document.getElementById('btnOcr');
+
+  if (!fileInput.files || fileInput.files.length === 0) return alert("Lütfen fiş görseli seçin!");
+
+  btn.disabled = true;
+  status.innerText = "⏳ Yapay zeka fişi tarıyor ve ürünleri ayıklıyor...";
+
+  try {
+    const file = fileInput.files[0];
+    const result = await Tesseract.recognize(file, 'tur');
+    
+    // Okunan metni satırlara böl
+    const tumSatirlar = result.data.text.split('\n');
+
+    // Fişteki adres, KDV, tarih ve fiyat gibi gereksiz satırları filtreleme
+    const filtrelenmisUrunler = tumSatirlar.map(s => s.trim()).filter(satir => {
+      if (satir.length < 3) return false;
+      const ust = satir.toUpperCase();
+      
+      // Fiş başlığı, fiyat, KDV ve alt bilgi filtreleri
+      if (ust.includes('MARKET') || ust.includes('TİC') || ust.includes('MAMAK') || ust.includes('ANKARA') || ust.includes('ŞAHİNTEPE')) return false;
+      if (ust.includes('TARİH') || ust.includes('SAAT') || ust.includes('FİŞ NO') || ust.includes('TOPKDV') || ust.includes('TOPLAM')) return false;
+      if (ust.includes('ANADOLU') || ust.includes('VERGİ') || ust.includes('V.D')) return false;
+      if (satir.includes('*') || satir.includes('%') || satir.includes('KG X') || /^\d+/.test(satir)) return false;
+
+      return true;
+    });
+
+    if (filtrelenmisUrunler.length === 0) {
+      status.innerText = "⚠️ Fişten geçerli bir ürün adı okunamadı.";
+      btn.disabled = false;
+      return;
+    }
+
+    // Supabase'e eklemek için dizi formatına getir
+    const eklenecekler = filtrelenmisUrunler.map(urun => ({
+      malzeme_adi: urun,
+      ekleyen_kisi: aktifKullanici
+    }));
+
+    // Hepsini tek hamlede Supabase'e gönder
+    const { error } = await _supabase.from('dolaptakiler').insert(eklenecekler);
+
+    if (error) {
+      console.error("Supabase Ekleme Hatası:", error);
+      status.innerText = "❌ Veritabanına eklenirken hata oluştu: " + error.message;
+    } else {
+      status.innerText = `✅ ${filtrelenmisUrunler.length} adet ürün başarıyla dolaba eklendi!`;
+      dolapGetir();
+      tarifleriGetir();
+    }
+
+  } catch (e) {
+    console.error("OCR Hatası:", e);
+    status.innerText = "❌ Okuma hatası oluştu.";
+  } finally {
+    btn.disabled = false;
+  }
+}
