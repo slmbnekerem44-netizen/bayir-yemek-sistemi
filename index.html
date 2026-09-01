@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,6 +20,20 @@
       --border-color: rgba(255, 255, 255, 0.1);
     }
 
+    [data-theme="light"] {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --input-bg: rgba(241, 245, 249, 0.9);
+      --input-border: #cbd5e1;
+      --success: #059669;
+      --danger: #dc2626;
+      --border-color: rgba(0, 0, 0, 0.1);
+    }
+
     * { box-sizing: border-box; }
 
     body {
@@ -34,6 +48,7 @@
       align-items: center;
       overflow-x: hidden;
       position: relative;
+      transition: background 0.3s, color 0.3s;
     }
 
     /* Sol Üst Sürüm Göstergesi */
@@ -41,7 +56,7 @@
       position: fixed;
       top: 12px;
       left: 12px;
-      background: rgba(30, 41, 59, 0.8);
+      background: var(--card-bg);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
       padding: 4px 10px;
@@ -51,6 +66,29 @@
       backdrop-filter: blur(8px);
       z-index: 1000;
       letter-spacing: 0.5px;
+    }
+
+    /* Sağ Üst Tema Değiştirici Buton */
+    .theme-toggle-btn {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--primary);
+      color: white;
     }
 
     /* Arka Planda Yoğun Kalp Yağmuru */
@@ -83,9 +121,10 @@
 
     .card {
       width: 100%; background: var(--card-bg); padding: 24px;
-      border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
       border: 1px solid var(--border-color); backdrop-filter: blur(12px);
       text-align: center;
+      transition: background 0.3s, border 0.3s;
     }
 
     h2 { font-size: 1.4rem; margin-bottom: 16px; }
@@ -95,6 +134,7 @@
       width: 100%; padding: 12px; margin: 6px 0 12px 0; border-radius: 12px;
       border: 1px solid var(--input-border); background: var(--input-bg);
       color: var(--text); font-size: 14px; outline: none; font-family: inherit;
+      transition: all 0.2s;
     }
 
     /* Modern Kutucuklu PIN Girişi */
@@ -137,7 +177,7 @@
     .hidden { display: none !important; }
 
     .poll-card {
-      background: rgba(0, 0, 0, 0.3); border-radius: 16px; padding: 16px;
+      background: var(--input-bg); border-radius: 16px; padding: 16px;
       margin-bottom: 16px; border: 1px solid var(--border-color); text-align: left;
       position: relative;
     }
@@ -202,14 +242,13 @@
 </head>
 <body>
 
-  <!-- Sol Üst Köşe Sürüm Göstergesi -->
-  <div class="version-badge">v1.2</div>
+  <div class="version-badge">v1.3</div>
 
-  <!-- Arka Planda Yoğun Kalp Yağmuru -->
+  <button class="theme-toggle-btn" id="themeBtn" onclick="temaDegistir()">☀️ Açık Mod</button>
+
   <div class="bg-hearts" id="bgHearts"></div>
 
   <div class="container">
-    <!-- Giriş Ekranı -->
     <div id="loginScreen" class="card">
       <h2>❤️ Bayır Ailesi Girişi ❤️</h2>
       <select id="userSelect" onchange="kullaniciSecildi()">
@@ -234,11 +273,10 @@
       </div>
     </div>
 
-    <!-- Ana Uygulama Ekranı -->
     <div id="appScreen" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <span id="userInfo" style="font-weight:700; color:#38bdf8;"></span>
-        <button onclick="cikisYap()" class="action-btn" style="width:auto; padding:6px 12px; background:#475569; font-size:12px;">Çıkış</button>
+        <span id="userInfo" style="font-weight:700; color:var(--primary);"></span>
+        <button onclick="cikisYap()" class="action-btn" style="width:auto; padding:6px 12px; background:var(--text-muted); font-size:12px;">Çıkış</button>
       </div>
 
       <div id="tabOylama">
@@ -294,9 +332,33 @@
     let kayitliSifreVarMi = false;
 
     window.onload = () => {
+      temaYukle();
       kalpYagmuruBaslat();
       if (aktifKullanici) ekraniGuncelle();
     };
+
+    function temaYukle() {
+      const kaydedilenTema = localStorage.getItem('bayir_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', kaydedilenTema);
+      temaButonMetniniGuncelle(kaydedilenTema);
+    }
+
+    function temaDegistir() {
+      const simdikiTema = document.documentElement.getAttribute('data-theme');
+      const yeniTema = simdikiTema === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', yeniTema);
+      localStorage.setItem('bayir_theme', yeniTema);
+      temaButonMetniniGuncelle(yeniTema);
+    }
+
+    function temaButonMetniniGuncelle(tema) {
+      const btn = document.getElementById('themeBtn');
+      if (tema === 'dark') {
+        btn.innerHTML = '☀️ Açık Mod';
+      } else {
+        btn.innerHTML = '🌙 Gece Modu';
+      }
+    }
 
     function kalpYagmuruBaslat() {
       const container = document.getElementById('bgHearts');
@@ -451,19 +513,15 @@
       const { data } = await _supabase.from('yemek_secimi').select('*').eq('id', yemekId).single();
       if (!data) return;
 
-      // Veritabanındaki stringleri diziye çevir
       let evetler = data.evet_oylar ? data.evet_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
       let hayirlar = data.hayir_oylar ? data.hayir_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-      // Kullanıcının önceki oylarını temizle
       evetler = evetler.filter(k => k !== aktifKullanici);
       hayirlar = hayirlar.filter(k => k !== aktifKullanici);
 
-      // Yeni oyu ekle
       if (tip === 'evet') evetler.push(aktifKullanici);
       if (tip === 'hayir') hayirlar.push(aktifKullanici);
 
-      // Tekrar string yapıp kaydet
       await _supabase.from('yemek_secimi').update({
         evet_oylar: evetler.join(','),
         hayir_oylar: hayirlar.join(',')
@@ -496,8 +554,8 @@
               👎 Hayır (${hayirlar.length}): <span style="color:var(--danger);">${hayirlar.join(', ') || 'Yok'}</span>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button onclick="oyVer(${d.id}, 'evet')" class="action-btn ${evetVerdi ? 'btn-green' : ''}" style="padding: 8px; font-size: 12px; background: ${evetVerdi ? 'var(--success)' : '#334155'}">👍 Evet</button>
-              <button onclick="oyVer(${d.id}, 'hayir')" class="action-btn ${hayirVerdi ? 'btn-red' : ''}" style="padding: 8px; font-size: 12px; background: ${hayirVerdi ? 'var(--danger)' : '#334155'}">👎 Hayır</button>
+              <button onclick="oyVer(${d.id}, 'evet')" class="action-btn ${evetVerdi ? 'btn-green' : ''}" style="padding: 8px; font-size: 12px; background: ${evetVerdi ? 'var(--success)' : 'var(--input-border)'}">👍 Evet</button>
+              <button onclick="oyVer(${d.id}, 'hayir')" class="action-btn ${hayirVerdi ? 'btn-red' : ''}" style="padding: 8px; font-size: 12px; background: ${hayirVerdi ? 'var(--danger)' : 'var(--input-border)'}">👎 Hayır</button>
             </div>
           </div>
         `;
@@ -604,7 +662,7 @@
           <div class="poll-card">
             ${benimTarifim ? `<button onclick="tarifSil(${t.id})" class="delete-x-btn">❌ Sil</button>` : ''}
             <h4 style="margin:0 0 6px 0;">${t.tarif_adi} <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">(${t.ekleyen_kisi})</span></h4>
-            ${t.reels_link ? `<a href="${t.reels_link}" target="_blank" style="color:#38bdf8; font-size:12px;">🎬 Reels Videosunu İzle</a><br>` : ''}
+            ${t.reels_link ? `<a href="${t.reels_link}" target="_blank" style="color:var(--primary); font-size:12px;">🎬 Reels Videosunu İzle</a><br>` : ''}
             <div style="margin-top:8px;">
               <small style="color:var(--text-muted);">Malzeme Durumu:</small><br>
               ${malzemeHTML}
