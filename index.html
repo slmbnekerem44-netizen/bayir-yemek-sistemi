@@ -203,7 +203,7 @@
 <body>
 
   <!-- Sol Üst Köşe Sürüm Göstergesi -->
-  <div class="version-badge">v1.1</div>
+  <div class="version-badge">v1.2</div>
 
   <!-- Arka Planda Yoğun Kalp Yağmuru -->
   <div class="bg-hearts" id="bgHearts"></div>
@@ -434,8 +434,8 @@
         onerilen_yemek: val, 
         oneren_kisi: aktifKullanici, 
         durum: 'Oylamada',
-        evet_oylar: [],
-        hayir_oylar: []
+        evet_oylar: '',
+        hayir_oylar: ''
       }]);
       document.getElementById('mainFood').value = '';
       oylamaGetir();
@@ -451,18 +451,22 @@
       const { data } = await _supabase.from('yemek_secimi').select('*').eq('id', yemekId).single();
       if (!data) return;
 
-      let evetler = data.evet_oylar || [];
-      let hayirlar = data.hayir_oylar || [];
+      // Veritabanındaki stringleri diziye çevir
+      let evetler = data.evet_oylar ? data.evet_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
+      let hayirlar = data.hayir_oylar ? data.hayir_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
 
+      // Kullanıcının önceki oylarını temizle
       evetler = evetler.filter(k => k !== aktifKullanici);
       hayirlar = hayirlar.filter(k => k !== aktifKullanici);
 
+      // Yeni oyu ekle
       if (tip === 'evet') evetler.push(aktifKullanici);
       if (tip === 'hayir') hayirlar.push(aktifKullanici);
 
+      // Tekrar string yapıp kaydet
       await _supabase.from('yemek_secimi').update({
-        evet_oylar: evetler,
-        hayir_oylar: hayirlar
+        evet_oylar: evetler.join(','),
+        hayir_oylar: hayirlar.join(',')
       }).eq('id', yemekId);
 
       oylamaGetir();
@@ -477,8 +481,8 @@
       }
 
       alan.innerHTML = data.map(d => {
-        const evetler = d.evet_oylar || [];
-        const hayirlar = d.hayir_oylar || [];
+        const evetler = d.evet_oylar ? d.evet_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
+        const hayirlar = d.hayir_oylar ? d.hayir_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
         const evetVerdi = evetler.includes(aktifKullanici);
         const hayirVerdi = hayirlar.includes(aktifKullanici);
         const benimOnerim = d.oneren_kisi === aktifKullanici;
