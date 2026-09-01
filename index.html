@@ -51,61 +51,30 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    /* Sol Üst Sürüm Göstergesi */
     .version-badge {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      letter-spacing: 0.5px;
+      position: fixed; top: 12px; left: 12px; background: var(--card-bg);
+      border: 1px solid var(--border-color); color: var(--text-muted);
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      backdrop-filter: blur(8px); z-index: 1000; letter-spacing: 0.5px;
     }
 
-    /* Sağ Üst Tema Değiştirici Buton */
     .theme-toggle-btn {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.2s;
+      position: fixed; top: 12px; right: 12px; background: var(--card-bg);
+      border: 1px solid var(--border-color); color: var(--text);
+      padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; backdrop-filter: blur(8px); z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s;
     }
-    .theme-toggle-btn:hover {
-      background: var(--primary);
-      color: white;
-    }
+    .theme-toggle-btn:hover { background: var(--primary); color: white; }
 
-    /* Arka Planda Yoğun Kalp Yağmuru */
     .bg-hearts {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      overflow: hidden;
-      z-index: 1;
-      pointer-events: none;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden; z-index: 1; pointer-events: none;
     }
 
     .heart {
-      position: absolute;
-      bottom: -60px;
-      font-size: 24px;
-      animation: floatUp 5s linear infinite;
-      user-select: none;
+      position: absolute; bottom: -60px; font-size: 24px;
+      animation: floatUp 5s linear infinite; user-select: none;
       filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
     }
 
@@ -115,16 +84,13 @@
       100% { transform: translateY(-108vh) rotate(360deg) scale(1.2); opacity: 0; }
     }
 
-    .container {
-      width: 100%; max-width: 440px; padding: 16px; z-index: 10; position: relative;
-    }
+    .container { width: 100%; max-width: 440px; padding: 16px; z-index: 10; position: relative; }
 
     .card {
       width: 100%; background: var(--card-bg); padding: 24px;
       border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
       border: 1px solid var(--border-color); backdrop-filter: blur(12px);
-      text-align: center;
-      transition: background 0.3s, border 0.3s;
+      text-align: center; transition: background 0.3s, border 0.3s;
     }
 
     h2 { font-size: 1.4rem; margin-bottom: 16px; }
@@ -137,32 +103,13 @@
       transition: all 0.2s;
     }
 
-    /* Modern Kutucuklu PIN Girişi */
-    .pin-container {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin: 16px 0;
-    }
-
+    .pin-container { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
     .pin-box {
-      width: 45px;
-      height: 55px;
-      font-size: 24px;
-      font-weight: bold;
-      text-align: center;
-      background: var(--input-bg);
-      border: 2px solid var(--input-border);
-      color: var(--text);
-      border-radius: 12px;
-      outline: none;
-      transition: all 0.2s;
+      width: 45px; height: 55px; font-size: 24px; font-weight: bold; text-align: center;
+      background: var(--input-bg); border: 2px solid var(--input-border); color: var(--text);
+      border-radius: 12px; outline: none; transition: all 0.2s;
     }
-
-    .pin-box:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
-    }
+    .pin-box:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.4); }
 
     button.action-btn {
       width: 100%; padding: 12px; border-radius: 12px; border: none;
@@ -183,64 +130,50 @@
     }
 
     .delete-x-btn {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid var(--danger);
-      color: var(--danger);
-      padding: 2px 8px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-      float: right;
-      transition: all 0.2s;
+      background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger);
+      color: var(--danger); padding: 2px 8px; border-radius: 8px;
+      font-size: 11px; font-weight: bold; cursor: pointer; float: right; transition: all 0.2s;
     }
-    .delete-x-btn:hover {
-      background: var(--danger);
-      color: white;
+    .delete-x-btn:hover { background: var(--danger); color: white; }
+
+    /* MALZEME ETİKETLERİNİN ÜST ÜSTE BİNMEMESİ İÇİN DÜZENLİ FLEX YAPISI */
+    .ingredients-flex-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      margin-bottom: 8px;
     }
 
     .ingredient-badge-container {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      margin: 3px 2px;
     }
 
     .ingredient-badge {
-      padding: 4px 10px; border-radius: 20px; font-size: 12px;
-      font-weight: 700;
+      padding: 5px 10px; border-radius: 20px; font-size: 12px;
+      font-weight: 600; white-space: nowrap;
     }
     .badge-has { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
     .badge-missing { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
     
     .badge-delete {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      cursor: pointer;
-      text-decoration: none;
+      background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger);
+      border-radius: 50%; width: 18px; height: 18px; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 9px; cursor: pointer; text-decoration: none;
     }
     .badge-delete:hover { background: var(--danger); color: white; }
 
-    /* Modal (Popup) Tasarımı */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-      display: flex; justify-content: center; align-items: center;
-      z-index: 2000; padding: 16px;
+      display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 16px;
     }
     .modal-content {
       background: var(--card-bg); border: 1px solid var(--border-color);
       width: 100%; max-width: 400px; padding: 24px; border-radius: 24px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.3); text-align: left;
-      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3); text-align: left; max-height: 90vh; overflow-y: auto;
     }
 
     .bottom-nav {
@@ -256,17 +189,11 @@
 </head>
 <body>
 
-  <!-- Sol Üst Köşe Sürüm Göstergesi -->
-  <div class="version-badge">v1.9</div>
-
-  <!-- Sağ Üst Tema Değiştirici Buton -->
+  <div class="version-badge">v2.1</div>
   <button class="theme-toggle-btn" id="themeBtn" onclick="temaDegistir()">☀️ Açık Mod</button>
-
-  <!-- Arka Planda Yoğun Kalp Yağmuru -->
   <div class="bg-hearts" id="bgHearts"></div>
 
   <div class="container">
-    <!-- Giriş Ekranı -->
     <div id="loginScreen" class="card">
       <h2>❤️ Bayır Ailesi Girişi ❤️</h2>
       <select id="userSelect" onchange="kullaniciSecildi()">
@@ -291,7 +218,6 @@
       </div>
     </div>
 
-    <!-- Ana Uygulama Ekranı -->
     <div id="appScreen" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <span id="userInfo" style="font-weight:700; color:var(--primary);"></span>
@@ -320,12 +246,10 @@
             <h4 style="margin:0;">🧊 Dolaptaki Malzemeler:</h4>
             <button onclick="dolabiBosalt()" class="action-btn" style="width:auto; padding:4px 10px; background:var(--danger); font-size:12px;">🗑️ Dolabı Boşalt</button>
           </div>
-          <div id="dolapListesi">Yükleniyor...</div>
+          <div id="dolapListesi" class="ingredients-flex-wrap">Yükleniyor...</div>
         </div>
 
         <hr style="border:0; border-top:1px solid var(--border-color); margin:16px 0;">
-
-        <!-- Yeni Tarif Ekle Butonu -->
         <button class="action-btn btn-green" onclick="tarifModalAc()" style="margin-bottom: 16px;">✨ Yeni Tarif Ekle</button>
 
         <h3 style="margin-top:16px;">📜 Kayıtlı Tarifler</h3>
@@ -334,23 +258,17 @@
     </div>
   </div>
 
-  <!-- Tarif Ekleme Popup (Modal) -->
   <div id="tarifModal" class="modal-overlay hidden">
     <div class="modal-content">
       <h3 style="margin-top:0; color:var(--text);">📖 Yeni Tarif Ekle</h3>
-      
       <label style="font-size:12px; color:var(--text-muted);">Tarif Adı:</label>
       <input type="text" id="yeniTarifAdi" placeholder="Örn: Kremalı Mantarlı Tavuk">
-
-      <label style="font-size:12px; color:var(--text-muted);">Reels / Video Linki (İsteğe bağlı):</label>
+      <label style="font-size:12px; color:var(--text-muted);">Reels / Video Linki:</label>
       <input type="text" id="yeniReelsUrl" placeholder="https://instagram.com/reel/...">
-
       <label style="font-size:12px; color:var(--text-muted);">Malzemeler (Virgülle ayırın):</label>
-      <input type="text" id="yeniTarifMalzemeler" placeholder="Örn: Tavuk, Krema, Mantar, Tuz">
-
-      <label style="font-size:12px; color:var(--text-muted);">Tarifin Yapılışı (Nasıl yapılır?):</label>
-      <textarea id="yeniTarifYapilis" rows="4" placeholder="Adım adım yapılışını buraya yazabilirsiniz..."></textarea>
-
+      <input type="text" id="yeniTarifMalzemeler" placeholder="Örn: 2 çay kaşığı köri, 1 paket krema, tuz">
+      <label style="font-size:12px; color:var(--text-muted);">Tarifin Yapılışı:</label>
+      <textarea id="yeniTarifYapilis" rows="4" placeholder="Adım adım yapılışı..."></textarea>
       <div style="display: flex; gap: 8px; margin-top: 12px;">
         <button class="action-btn btn-green" onclick="tarifKaydet()">Kaydet</button>
         <button class="action-btn" onclick="tarifModalKapat()" style="background:var(--text-muted);">İptal</button>
@@ -366,7 +284,15 @@
   <script>
     const SUPABASE_URL = 'https://vcjrivgycetdjlporarj.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_fzLprz7OMs8hCJC4l-qmAw_gSBTcL-b';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let _supabase = null;
+
+    try {
+      if (window.supabase) {
+        _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch (e) {
+      console.error(e);
+    }
 
     let aktifKullanici = localStorage.getItem('bayir_user') || null;
     let kayitliSifreVarMi = false;
@@ -378,32 +304,28 @@
     };
 
     function temaYukle() {
-      const kaydedilenTema = localStorage.getItem('bayir_theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', kaydedilenTema);
-      temaButonMetniniGuncelle(kaydedilenTema);
+      const t = localStorage.getItem('bayir_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      temaButonMetniniGuncelle(t);
     }
 
     function temaDegistir() {
-      const simdikiTema = document.documentElement.getAttribute('data-theme');
-      const yeniTema = simdikiTema === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', yeniTema);
-      localStorage.setItem('bayir_theme', yeniTema);
-      temaButonMetniniGuncelle(yeniTema);
+      const s = document.documentElement.getAttribute('data-theme');
+      const y = s === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', y);
+      localStorage.setItem('bayir_theme', y);
+      temaButonMetniniGuncelle(y);
     }
 
-    function temaButonMetniniGuncelle(tema) {
+    function temaButonMetniniGuncelle(t) {
       const btn = document.getElementById('themeBtn');
-      if (tema === 'dark') {
-        btn.innerHTML = '☀️ Açık Mod';
-      } else {
-        btn.innerHTML = '🌙 Gece Modu';
-      }
+      if (btn) btn.innerHTML = (t === 'dark') ? '☀️ Açık Mod' : '🌙 Gece Modu';
     }
 
     function kalpYagmuruBaslat() {
       const container = document.getElementById('bgHearts');
+      if (!container) return;
       const simgeler = ['❤️', '💖', '💘', '💓', '💕', '💗', '❤️‍🔥', '❣️', '💜', '💙'];
-      
       setInterval(() => {
         const heart = document.createElement('div');
         heart.className = 'heart';
@@ -412,52 +334,40 @@
         heart.style.animationDuration = (Math.random() * 2.5 + 2.5) + 's';
         heart.style.fontSize = (Math.random() * 20 + 16) + 'px';
         container.appendChild(heart);
-
         setTimeout(() => heart.remove(), 5500);
-      }, 120);
+      }, 150);
     }
 
     async function kullaniciSecildi() {
       const u = document.getElementById('userSelect').value;
       const pinArea = document.getElementById('pinArea');
       const pinLabel = document.getElementById('pinLabel');
-
-      if (!u) {
-        pinArea.classList.add('hidden');
-        return;
-      }
-
+      if (!u) { pinArea.classList.add('hidden'); return; }
       pinArea.classList.remove('hidden');
       pinTemizle();
-
-      const { data } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).single();
-
-      if (data && data.sifre) {
-        kayitliSifreVarMi = true;
-        pinLabel.style.color = 'var(--text-muted)';
-        pinLabel.innerText = `${u}, Şifrenizi Girin`;
-      } else {
-        kayitliSifreVarMi = false;
-        pinLabel.style.color = 'var(--text-muted)';
-        pinLabel.innerText = `${u}, İlk Giriş: Yeni Şifre Belirleyin`;
-      }
+      if (!_supabase) return;
+      try {
+        const { data } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).maybeSingle();
+        if (data && data.sifre) {
+          kayitliSifreVarMi = true;
+          pinLabel.innerText = `${u}, Şifrenizi Girin`;
+        } else {
+          kayitliSifreVarMi = false;
+          pinLabel.innerText = `${u}, Yeni Şifre Belirleyin`;
+        }
+      } catch (err) { console.error(err); }
     }
 
     function sonrakiInput(el, index) {
-      if (el.value.length === 1 && index < 5) {
-        document.querySelectorAll('.pin-box')[index + 1].focus();
-      }
+      if (el.value.length === 1 && index < 5) document.querySelectorAll('.pin-box')[index + 1].focus();
     }
-
     function geriTusu(event, index) {
-      if (event.key === 'Backspace' && index > 0 && !event.target.value) {
-        document.querySelectorAll('.pin-box')[index - 1].focus();
-      }
+      if (event.key === 'Backspace' && index > 0 && !event.target.value) document.querySelectorAll('.pin-box')[index - 1].focus();
     }
-
     function pinTemizle() {
       document.querySelectorAll('.pin-box').forEach(box => box.value = '');
-      document.querySelectorAll('.pin-box')[0].focus();
+      const f = document.querySelectorAll('.pin-box')[0];
+      if (f) f.focus();
     }
 
     async function sifreIslemiYap() {
@@ -465,33 +375,20 @@
       const pinLabel = document.getElementById('pinLabel');
       let sifre = '';
       document.querySelectorAll('.pin-box').forEach(box => sifre += box.value);
+      if (sifre.length < 6) { pinLabel.innerText = '❌ Eksiksiz doldurun!'; return; }
+      if (!_supabase) return;
 
-      if (sifre.length < 6) {
-        pinLabel.style.color = 'var(--danger)';
-        pinLabel.innerText = '❌ Lütfen 6 haneli şifreyi eksiksiz doldurun!';
-        return;
-      }
-
-      if (kayitliSifreVarMi) {
-        const { data } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).single();
-        if (data && data.sifre === sifre) {
-          basariliGiris(u);
+      try {
+        if (kayitliSifreVarMi) {
+          const { data } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).maybeSingle();
+          if (data && data.sifre === sifre) basariliGiris(u);
+          else { pinLabel.innerText = '❌ Hatalı şifre!'; pinTemizle(); }
         } else {
-          pinLabel.style.color = 'var(--danger)';
-          pinLabel.innerText = '❌ Hatalı şifre!';
-          pinTemizle();
+          const { error } = await _supabase.from('kullanicilar').insert([{ kullanici_adi: u, sifre: sifre }]);
+          if (error) pinLabel.innerText = '❌ Hata: ' + error.message;
+          else { pinLabel.innerText = '✅ Şifre oluşturuldu!'; setTimeout(() => basariliGiris(u), 800); }
         }
-      } else {
-        const { error } = await _supabase.from('kullanicilar').insert([{ kullanici_adi: u, sifre: sifre }]);
-        if (error) {
-          pinLabel.style.color = 'var(--danger)';
-          pinLabel.innerText = '❌ Şifre kaydedilirken hata oluştu: ' + error.message;
-        } else {
-          pinLabel.style.color = 'var(--success)';
-          pinLabel.innerText = '✅ Şifreniz başarıyla oluşturuldu!';
-          setTimeout(() => basariliGiris(u), 800);
-        }
-      }
+      } catch (e) { pinLabel.innerText = '❌ Bağlantı hatası!'; }
     }
 
     function basariliGiris(u) {
@@ -499,20 +396,14 @@
       localStorage.setItem('bayir_user', u);
       ekraniGuncelle();
     }
-
-    function cikisYap() {
-      localStorage.removeItem('bayir_user');
-      location.reload();
-    }
+    function cikisYap() { localStorage.removeItem('bayir_user'); location.reload(); }
 
     function ekraniGuncelle() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
       document.getElementById('bottomNav').classList.remove('hidden');
       document.getElementById('userInfo').innerText = '❤️ ' + aktifKullanici;
-      oylamaGetir();
-      dolapGetir();
-      tarifleriGetir();
+      oylamaGetir(); dolapGetir(); tarifleriGetir();
     }
 
     function sekmeDegistir(sekme) {
@@ -531,71 +422,51 @@
 
     async function yemekOner() {
       const val = document.getElementById('mainFood').value.trim();
-      if (!val) return;
-      await _supabase.from('yemek_secimi').insert([{ 
-        onerilen_yemek: val, 
-        oneren_kisi: aktifKullanici, 
-        durum: 'Oylamada',
-        evet_oylar: '',
-        hayir_oylar: ''
-      }]);
+      if (!val || !_supabase) return;
+      await _supabase.from('yemek_secimi').insert([{ onerilen_yemek: val, oneren_kisi: aktifKullanici, evet_oylar: '', hayir_oylar: '' }]);
       document.getElementById('mainFood').value = '';
       oylamaGetir();
     }
 
-    async function yemekSil(yemekId) {
-      if (!confirm("Bu yemek önerisini silmek istiyor musun?")) return;
-      await _supabase.from('yemek_secimi').delete().eq('id', yemekId);
+    async function yemekSil(id) {
+      if (!confirm("Silmek istiyor musun?") || !_supabase) return;
+      await _supabase.from('yemek_secimi').delete().eq('id', id);
       oylamaGetir();
     }
 
-    async function oyVer(yemekId, tip) {
-      const { data } = await _supabase.from('yemek_secimi').select('*').eq('id', yemekId).single();
+    async function oyVer(id, tip) {
+      if (!_supabase) return;
+      const { data } = await _supabase.from('yemek_secimi').select('*').eq('id', id).maybeSingle();
       if (!data) return;
-
       let evetler = data.evet_oylar ? data.evet_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
       let hayirlar = data.hayir_oylar ? data.hayir_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
-
       evetler = evetler.filter(k => k !== aktifKullanici);
       hayirlar = hayirlar.filter(k => k !== aktifKullanici);
-
       if (tip === 'evet') evetler.push(aktifKullanici);
       if (tip === 'hayir') hayirlar.push(aktifKullanici);
-
-      await _supabase.from('yemek_secimi').update({
-        evet_oylar: evetler.join(','),
-        hayir_oylar: hayirlar.join(',')
-      }).eq('id', yemekId);
-
+      await _supabase.from('yemek_secimi').update({ evet_oylar: evetler.join(','), hayir_oylar: hayirlar.join(',') }).eq('id', id);
       oylamaGetir();
     }
 
     async function oylamaGetir() {
       const alan = document.getElementById('voteArea');
+      if (!_supabase) return;
       const { data } = await _supabase.from('yemek_secimi').select('*');
-      if (!data || data.length === 0) {
-        alan.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Aktif oylama yok.</p>";
-        return;
-      }
-
+      if (!data || data.length === 0) { alan.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Aktif oylama yok.</p>"; return; }
       alan.innerHTML = data.map(d => {
         const evetler = d.evet_oylar ? d.evet_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
         const hayirlar = d.hayir_oylar ? d.hayir_oylar.split(',').map(s => s.trim()).filter(Boolean) : [];
-        const evetVerdi = evetler.includes(aktifKullanici);
-        const hayirVerdi = hayirlar.includes(aktifKullanici);
-        const benimOnerim = d.oneren_kisi === aktifKullanici;
-
         return `
           <div class="poll-card">
-            ${benimOnerim ? `<button onclick="yemekSil(${d.id})" class="delete-x-btn">❌ Sil</button>` : ''}
+            ${d.oneren_kisi === aktifKullanici ? `<button onclick="yemekSil(${d.id})" class="delete-x-btn">❌ Sil</button>` : ''}
             <strong style="font-size: 16px;">${d.onerilen_yemek}</strong> <span style="font-size:12px; color:var(--text-muted);">(${d.oneren_kisi})</span><br>
             <div style="margin: 10px 0; font-size: 13px;">
               👍 Evet (${evetler.length}): <span style="color:var(--success);">${evetler.join(', ') || 'Yok'}</span><br>
               👎 Hayır (${hayirlar.length}): <span style="color:var(--danger);">${hayirlar.join(', ') || 'Yok'}</span>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button onclick="oyVer(${d.id}, 'evet')" class="action-btn ${evetVerdi ? 'btn-green' : ''}" style="padding: 8px; font-size: 12px; background: ${evetVerdi ? 'var(--success)' : 'var(--input-border)'}">👍 Evet</button>
-              <button onclick="oyVer(${d.id}, 'hayir')" class="action-btn ${hayirVerdi ? 'btn-red' : ''}" style="padding: 8px; font-size: 12px; background: ${hayirVerdi ? 'var(--danger)' : 'var(--input-border)'}">👎 Hayır</button>
+              <button onclick="oyVer(${d.id}, 'evet')" class="action-btn" style="padding: 8px; font-size: 12px; background: ${evetler.includes(aktifKullanici)?'var(--success)':'var(--input-border)'}">👍 Evet</button>
+              <button onclick="oyVer(${d.id}, 'hayir')" class="action-btn" style="padding: 8px; font-size: 12px; background: ${hayirlar.includes(aktifKullanici)?'var(--danger)':'var(--input-border)'}">👎 Hayır</button>
             </div>
           </div>
         `;
@@ -604,53 +475,40 @@
 
     async function manuelMalzemeEkle() {
       const val = document.getElementById('manuelMalzeme').value.trim();
-      if (!val) return;
-      const liste = val.split(',').map(m => m.trim());
-      const eklenecekler = liste.filter(i => i).map(item => ({
-        malzeme_adi: item.toUpperCase(),
-        ekleyen_kisi: aktifKullanici
-      }));
+      if (!val || !_supabase) return;
+      const liste = val.split(',').map(m => m.trim()).filter(Boolean);
+      const eklenecekler = liste.map(item => ({ malzeme_adi: item.toUpperCase(), ekleyen_kisi: aktifKullanici }));
       await _supabase.from('dolaptakiler').insert(eklenecekler);
       document.getElementById('manuelMalzeme').value = '';
-      dolapGetir();
-      tarifleriGetir();
+      dolapGetir(); tarifleriGetir();
     }
 
-    async function malzemeSil(malzemeId) {
-      await _supabase.from('dolaptakiler').delete().eq('id', malzemeId);
-      dolapGetir();
-      tarifleriGetir();
+    async function malzemeSil(id) {
+      if (!_supabase) return;
+      await _supabase.from('dolaptakiler').delete().eq('id', id);
+      dolapGetir(); tarifleriGetir();
     }
 
     async function dolapGetir() {
-      const { data } = await _supabase.from('dolaptakiler').select('*');
       const el = document.getElementById('dolapListesi');
-      if (!data || data.length === 0) {
-        el.innerHTML = "<em style='color:var(--text-muted); font-size:12px;'>Dolap boş.</em>";
-        return;
-      }
-      el.innerHTML = data.map(d => {
-        const benimEkledigim = d.ekleyen_kisi === aktifKullanici;
-        return `
-          <span class="ingredient-badge-container">
-            <span class="ingredient-badge badge-has">✓ ${d.malzeme_adi}</span>
-            ${benimEkledigim ? `<a href="javascript:void(0)" onclick="malzemeSil(${d.id})" class="badge-delete" title="Sil">✕</a>` : ''}
-          </span>
-        `;
-      }).join(' ');
+      if (!_supabase) return;
+      const { data } = await _supabase.from('dolaptakiler').select('*');
+      if (!data || data.length === 0) { el.innerHTML = "<em style='color:var(--text-muted); font-size:12px;'>Dolap boş.</em>"; return; }
+      el.innerHTML = data.map(d => `
+        <span class="ingredient-badge-container">
+          <span class="ingredient-badge badge-has">✓ ${d.malzeme_adi}</span>
+          ${d.ekleyen_kisi === aktifKullanici ? `<a href="javascript:void(0)" onclick="malzemeSil(${d.id})" class="badge-delete">✕</a>` : ''}
+        </span>
+      `).join('');
     }
 
     async function dolabiBosalt() {
-      if (!confirm("Dolaptaki TÜM malzemeleri silmek istediğinden emin misin?")) return;
+      if (!confirm("Dolabı boşaltmak istiyor musun?") || !_supabase) return;
       await _supabase.from('dolaptakiler').delete().neq('id', 0);
-      dolapGetir();
-      tarifleriGetir();
+      dolapGetir(); tarifleriGetir();
     }
 
-    function tarifModalAc() {
-      document.getElementById('tarifModal').classList.remove('hidden');
-    }
-
+    function tarifModalAc() { document.getElementById('tarifModal').classList.remove('hidden'); }
     function tarifModalKapat() {
       document.getElementById('tarifModal').classList.add('hidden');
       document.getElementById('yeniTarifAdi').value = '';
@@ -664,70 +522,72 @@
       const url = document.getElementById('yeniReelsUrl').value.trim();
       const malzText = document.getElementById('yeniTarifMalzemeler').value.trim();
       const yapilis = document.getElementById('yeniTarifYapilis').value.trim();
-
-      if (!ad || !malzText) {
-        alert("Tarif adı ve malzemeler boş bırakılamaz!");
-        return;
-      }
-
-      const { error } = await _supabase.from('tarifler1').insert([{
-        tarif_adi: ad,
-        reels_link: url,
-        malzemeler: malzText,
-        yapılış: yapilis
-      }]);
-
-      if (error) {
-        alert("Hata: " + error.message);
-        return;
-      }
-
+      if (!ad || !malzText) { alert("Tarif adı ve malzemeler boş olamaz!"); return; }
+      if (!_supabase) return;
+      await _supabase.from('tarifler1').insert([{ tarif_adi: ad, reels_link: url, malzemeler: malzText, yapılış: yapilis }]);
       tarifModalKapat();
       tarifleriGetir();
     }
 
-    async function tarifSil(tarifId) {
-      if (!confirm("Bu tarifi silmek istediğinden emin misin?")) return;
-      await _supabase.from('tarifler1').delete().eq('id', tarifId);
+    async function tarifSil(id) {
+      if (!confirm("Tarifi silmek istiyor musun?") || !_supabase) return;
+      await _supabase.from('tarifler1').delete().eq('id', id);
       tarifleriGetir();
     }
 
+    // AKILLI MALZEME TEMİZLEME (Örn: "2 çay kaşığı şeker" -> "şeker" olarak algılar)
+    function safMalzemeAdiYap(hamMetin) {
+      let t = hamMetin.toLowerCase().trim();
+      // Ölçü kalıplarını ve sayıları ayıklamak için kelimelere bölüyoruz
+      const birimler = ['çay', 'kaşığı', 'tatlı', 'yemek', 'bardağı', 'su', 'gram', 'kg', 'kilogram', 'adet', 'paket', 'diş', 'tutam', 'yarım', 'çeyrek', 'baş', 'tutam', 'paketlik', 'ml', 'litre'];
+      let kelimeler = t.split(/\s+/).filter(kelime => {
+        // Sayıları ve birimleri listeden çıkarıyoruz
+        if (!isNaN(kelime)) return false;
+        if (birimler.includes(kelime)) return false;
+        return true;
+      });
+      return kelimeler.join(' ').trim() || t;
+    }
+
     async function tarifleriGetir() {
-      const { data: dolapData } = await _supabase.from('dolaptakiler').select('malzeme_adi');
-      const evdekiMalzemeler = dolapData ? dolapData.map(d => d.malzeme_adi.toLowerCase()) : [];
-      const { data: tarifler } = await _supabase.from('tarifler1').select('*');
       const area = document.getElementById('tariflerListesi');
+      if (!_supabase) return;
+      const { data: dolapData } = await _supabase.from('dolaptakiler').select('malzeme_adi');
+      const evdekiMalzemeler = dolapData ? dolapData.map(d => d.malzeme_adi.toUpperCase()) : [];
+      const { data: tarifler } = await _supabase.from('tarifler1').select('*');
       
       if (!tarifler || tarifler.length === 0) {
         area.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Henüz kayıtlı tarif yok.</p>";
         return;
       }
 
-      let html = '';
-      tarifler.forEach(t => {
+      area.innerHTML = tarifler.map(t => {
+        let gerekliler = t.malzemeler ? t.malzemeler.split(',') : [];
         let malzemeHTML = '';
-        let gerekliler = t.malzemeler || '';
-        if (typeof gerekliler === 'string') gerekliler = gerekliler.split(',');
-        
+
         gerekliler.forEach(m => {
-          const temizM = m.trim().toLowerCase();
-          if (!temizM) return;
-          const varMi = evdekiMalzemeler.some(evde => evde.includes(temizM) || temizM.includes(evde));
+          let ham = m.trim();
+          if (!ham) return;
+          let saf = safMalzemeAdiYap(ham).toUpperCase();
+          
+          // Dolapta var mı kontrolü (Akıllı eşleşme)
+          let varMi = evdekiMalzemeler.some(evde => evde.includes(saf) || saf.includes(evde));
+
           if (varMi) {
-            malzemeHTML += `<span class="ingredient-badge badge-has">✓ ${m.trim()}</span> `;
+            malzemeHTML += `<span class="ingredient-badge badge-has">✓ ${ham}</span>`;
           } else {
-            malzemeHTML += `<span class="ingredient-badge badge-missing">✕ ${m.trim()}</span> `;
+            malzemeHTML += `<span class="ingredient-badge badge-missing">✕ ${ham}</span>`;
           }
         });
 
-        html += `
+        return `
           <div class="poll-card">
             <button onclick="tarifSil(${t.id})" class="delete-x-btn">❌ Sil</button>
             <h4 style="margin:0 0 6px 0;">${t.tarif_adi || 'İsimsiz Tarif'}</h4>
             ${t.reels_link ? `<a href="${t.reels_link}" target="_blank" style="color:var(--primary); font-size:12px; display:inline-block; margin-bottom:6px;">🎬 Reels Videosunu İzle</a><br>` : ''}
             <div style="margin-top:6px; margin-bottom: 8px;">
-              <small style="color:var(--text-muted);">Malzeme Durumu:</small><br>
-              ${malzemeHTML}
+              <small style="color:var(--text-muted);">Malzeme Durumu:</small>
+              <div class="ingredients-flex-wrap">${malzemeHTML}</div>
             </div>
             ${t.yapılış ? `
               <div style="background: var(--input-bg); padding: 10px; border-radius: 8px; margin-top: 8px; border: 1px dashed var(--border-color);">
@@ -737,8 +597,7 @@
             ` : ''}
           </div>
         `;
-      });
-      area.innerHTML = html;
+      }).join('');
     }
   </script>
 </body>
