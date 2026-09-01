@@ -216,7 +216,7 @@
     <div class="spinner"></div>
   </div>
 
-  <div class="version-badge">v2.4</div>
+  <div class="version-badge">v2.5</div>
   <button class="theme-toggle-btn" id="themeBtn" onclick="temaDegistir()">☀️ Açık Mod</button>
   <div class="bg-hearts" id="bgHearts"></div>
 
@@ -264,7 +264,7 @@
         <h3>🧊 Dolaba Malzeme Ekle</h3>
         <div style="margin-top:14px; text-align:left;">
           <label style="font-size:12px; color:var(--text-muted);">Malzemeleri Virgülle Ayırarak Yaz:</label>
-          <input type="text" id="manuelMalzeme" placeholder="Örn: Süt, Yumurta, Domates">
+          <input type="text" id="manuelMalzeme" placeholder="Örn: Süt, Yumurta, Tavuk göğsü">
           <button class="action-btn btn-green" onclick="manuelMalzemeEkle()">Dolaba Ekle</button>
         </div>
 
@@ -293,7 +293,7 @@
       <label style="font-size:12px; color:var(--text-muted);">Reels / Video Linki:</label>
       <input type="text" id="yeniReelsUrl" placeholder="https://instagram.com/reel/...">
       <label style="font-size:12px; color:var(--text-muted);">Malzemeler (Virgülle ayırın):</label>
-      <input type="text" id="yeniTarifMalzemeler" placeholder="Örn: 2 çay kaşığı köri, 1 paket krema, tuz">
+      <input type="text" id="yeniTarifMalzemeler" placeholder="Örn: Tavuk göğsü, 1 paket krema, tuz">
       <label style="font-size:12px; color:var(--text-muted);">Tarifin Yapılışı:</label>
       <textarea id="yeniTarifYapilis" rows="4" placeholder="Adım adım yapılışı..."></textarea>
       <div style="display: flex; gap: 8px; margin-top: 12px;">
@@ -329,7 +329,6 @@
       kalpYagmuruBaslat();
       if (aktifKullanici) ekraniGuncelle();
       
-      // Sayfa yüklenince splash ekranını 1.2 saniye sonra şıkça kapatıyoruz
       setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) {
@@ -513,7 +512,8 @@
       const val = document.getElementById('manuelMalzeme').value.trim();
       if (!val || !_supabase) return;
       const liste = val.split(',').map(m => m.trim()).filter(Boolean);
-      const eklenecekler = liste.map(item => ({ malzeme_adi: item.toUpperCase(), ekleyen_kisi: aktifKullanici }));
+      // Artık büyük harfe zorlamıyoruz, kullanıcının yazdığı gibi (ilk harfi büyük veya orijinal) kaydediyoruz
+      const eklenecekler = liste.map(item => ({ malzeme_adi: item, ekleyen_kisi: aktifKullanici }));
       await _supabase.from('dolaptakiler').insert(eklenecekler);
       document.getElementById('manuelMalzeme').value = '';
       dolapGetir(); tarifleriGetir();
@@ -571,9 +571,16 @@
       tarifleriGetir();
     }
 
-    function safMalzemeAdiYap(hamMetin) {
-      let t = hamMetin.toLowerCase().trim();
-      const birimler = ['çay', 'kaşığı', 'tatlı', 'yemek', 'bardağı', 'su', 'gram', 'kg', 'kilogram', 'adet', 'paket', 'diş', 'tutam', 'yarım', 'çeyrek', 'baş', 'tutam', 'paketlik', 'ml', 'litre'];
+    // TÜRKÇE KARAKTERLERİ VE EKLERİ TEMİZLEYEN AKILLI EŞLEŞTİRME FONKSİYONU
+    function akilliTemizle(metin) {
+      if (!metin) return '';
+      let t = metin.toLowerCase()
+        .replace(/İ/g, 'i').replace(/I/g, 'ı')
+        .replace(/ç/g, 'c').replace(/ğ/g, 'g')
+        .replace(/ı/g, 'i').replace(/ö/g, 'o')
+        .replace(/ş/g, 's').replace(/ü/g, 'u');
+      
+      const birimler = ['cay', 'kasigi', 'tatli', 'yemek', 'bardagi', 'su', 'gram', 'kg', 'kilogram', 'adet', 'paket', 'dis', 'tutam', 'yarim', 'ceyrek', 'bas', 'ml', 'litre'];
       let kelimeler = t.split(/\s+/).filter(kelime => {
         if (!isNaN(kelime)) return false;
         if (birimler.includes(kelime)) return false;
@@ -587,7 +594,8 @@
       if (!_supabase) return;
       const { data: dolapData } = await _supabase.from('dolaptakiler').select('malzeme_adi');
       
-      const evdekiMalzemeler = dolapData ? dolapData.map(d => d.malzeme_adi.toLowerCase().trim()) : [];
+      // Dolaptaki malzemeleri akıllı temizleme işleminden geçiriyoruz (göğsü / göğüsü yakalasın diye)
+      const evdekiMalzemeler = dolapData ? dolapData.map(d => akilliTemizle(d.malzeme_adi)) : [];
       const { data: tarifler } = await _supabase.from('tarifler1').select('*');
       
       if (!tarifler || tarifler.length === 0) {
@@ -602,9 +610,13 @@
         gerekliler.forEach(m => {
           let ham = m.trim();
           if (!ham) return;
-          let saf = safMalzemeAdiYap(ham).toLowerCase();
+          let safTarifMalzemesi = akilliTemizle(ham);
           
-          let varMi = evdekiMalzemeler.some(evde => evde.includes(saf) || saf.includes(evde));
+          // Akıllı eşleşme kontrolü (içeriyor mu veya tam eşleşiyor mu)
+          let varMi = evdekiMalzemeler.some(evde => {
+            return evde.includes(safTarifMalzemesi) || safTarifMalzemesi.includes(evde) || 
+                   (evde.replace(/u$/, 'u') === safTarifMalzemesi.replace(/u$/, 'u')); // göğsü / göğüsü esnekliği
+          });
 
           if (varMi) {
             malzemeHTML += `<span class="ingredient-badge badge-has">✓ ${ham}</span>`;
