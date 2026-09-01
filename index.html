@@ -216,7 +216,7 @@
     <div class="spinner"></div>
   </div>
 
-  <div class="version-badge">v2.5</div>
+  <div class="version-badge">v2.6</div>
   <button class="theme-toggle-btn" id="themeBtn" onclick="temaDegistir()">☀️ Açık Mod</button>
   <div class="bg-hearts" id="bgHearts"></div>
 
@@ -264,7 +264,7 @@
         <h3>🧊 Dolaba Malzeme Ekle</h3>
         <div style="margin-top:14px; text-align:left;">
           <label style="font-size:12px; color:var(--text-muted);">Malzemeleri Virgülle Ayırarak Yaz:</label>
-          <input type="text" id="manuelMalzeme" placeholder="Örn: Süt, Yumurta, Tavuk göğsü">
+          <input type="text" id="manuelMalzeme" placeholder="Örn: 500 gram tavuk göğsü, domates">
           <button class="action-btn btn-green" onclick="manuelMalzemeEkle()">Dolaba Ekle</button>
         </div>
 
@@ -293,7 +293,7 @@
       <label style="font-size:12px; color:var(--text-muted);">Reels / Video Linki:</label>
       <input type="text" id="yeniReelsUrl" placeholder="https://instagram.com/reel/...">
       <label style="font-size:12px; color:var(--text-muted);">Malzemeler (Virgülle ayırın):</label>
-      <input type="text" id="yeniTarifMalzemeler" placeholder="Örn: Tavuk göğsü, 1 paket krema, tuz">
+      <input type="text" id="yeniTarifMalzemeler" placeholder="Örn: 500 gram tavuk göğsü, 1 paket krema">
       <label style="font-size:12px; color:var(--text-muted);">Tarifin Yapılışı:</label>
       <textarea id="yeniTarifYapilis" rows="4" placeholder="Adım adım yapılışı..."></textarea>
       <div style="display: flex; gap: 8px; margin-top: 12px;">
@@ -512,7 +512,6 @@
       const val = document.getElementById('manuelMalzeme').value.trim();
       if (!val || !_supabase) return;
       const liste = val.split(',').map(m => m.trim()).filter(Boolean);
-      // Artık büyük harfe zorlamıyoruz, kullanıcının yazdığı gibi (ilk harfi büyük veya orijinal) kaydediyoruz
       const eklenecekler = liste.map(item => ({ malzeme_adi: item, ekleyen_kisi: aktifKullanici }));
       await _supabase.from('dolaptakiler').insert(eklenecekler);
       document.getElementById('manuelMalzeme').value = '';
@@ -544,6 +543,7 @@
       dolapGetir(); tarifleriGetir();
     }
 
+    function tarifModalAc() { document.getElementById('tarifModal').classList.add('hidden') || document.getElementById('tarifModal').classList.remove('hidden'); }
     function tarifModalAc() { document.getElementById('tarifModal').classList.remove('hidden'); }
     function tarifModalKapat() {
       document.getElementById('tarifModal').classList.add('hidden');
@@ -571,22 +571,17 @@
       tarifleriGetir();
     }
 
-    // TÜRKÇE KARAKTERLERİ VE EKLERİ TEMİZLEYEN AKILLI EŞLEŞTİRME FONKSİYONU
-    function akilliTemizle(metin) {
+    // GELİŞTİRİLMİŞ AKILLI EŞLEŞTİRME (ÇİFT KATMANLI KONTROL)
+    function metniTemizle(metin) {
       if (!metin) return '';
-      let t = metin.toLowerCase()
+      return metin.toLowerCase()
         .replace(/İ/g, 'i').replace(/I/g, 'ı')
         .replace(/ç/g, 'c').replace(/ğ/g, 'g')
         .replace(/ı/g, 'i').replace(/ö/g, 'o')
-        .replace(/ş/g, 's').replace(/ü/g, 'u');
-      
-      const birimler = ['cay', 'kasigi', 'tatli', 'yemek', 'bardagi', 'su', 'gram', 'kg', 'kilogram', 'adet', 'paket', 'dis', 'tutam', 'yarim', 'ceyrek', 'bas', 'ml', 'litre'];
-      let kelimeler = t.split(/\s+/).filter(kelime => {
-        if (!isNaN(kelime)) return false;
-        if (birimler.includes(kelime)) return false;
-        return true;
-      });
-      return kelimeler.join(' ').trim() || t;
+        .replace(/ş/g, 's').replace(/ü/g, 'u')
+        .replace(/[^a-z0-9]/g, ' ') // Sadece harf ve rakamları bırak, diğer işaretleri boşluk yap
+        .replace(/\s+/g, ' ')
+        .trim();
     }
 
     async function tarifleriGetir() {
@@ -594,8 +589,7 @@
       if (!_supabase) return;
       const { data: dolapData } = await _supabase.from('dolaptakiler').select('malzeme_adi');
       
-      // Dolaptaki malzemeleri akıllı temizleme işleminden geçiriyoruz (göğsü / göğüsü yakalasın diye)
-      const evdekiMalzemeler = dolapData ? dolapData.map(d => akilliTemizle(d.malzeme_adi)) : [];
+      const evdekiMalzemeler = dolapData ? dolapData.map(d => metniTemizle(d.malzeme_adi)) : [];
       const { data: tarifler } = await _supabase.from('tarifler1').select('*');
       
       if (!tarifler || tarifler.length === 0) {
@@ -610,12 +604,14 @@
         gerekliler.forEach(m => {
           let ham = m.trim();
           if (!ham) return;
-          let safTarifMalzemesi = akilliTemizle(ham);
+          let safTarif = metniTemizle(ham);
           
-          // Akıllı eşleşme kontrolü (içeriyor mu veya tam eşleşiyor mu)
+          // Eşleşme testi: Tam eşleşme, içinde geçme veya göğsü/göğüsü esnekliği
           let varMi = evdekiMalzemeler.some(evde => {
-            return evde.includes(safTarifMalzemesi) || safTarifMalzemesi.includes(evde) || 
-                   (evde.replace(/u$/, 'u') === safTarifMalzemesi.replace(/u$/, 'u')); // göğsü / göğüsü esnekliği
+            return evde === safTarif || 
+                   evde.includes(safTarif) || 
+                   safTarif.includes(evde) ||
+                   (evde.replace(/u$/, '') === safTarif.replace(/u$/, ''));
           });
 
           if (varMi) {
