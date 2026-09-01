@@ -1,3 +1,4 @@
+<!-- Sürüm: v2.7 | Açıklama: İki yönlü kapsamlı eşleştirme eklendi; dolap ile tarif metinleri birbirini içerdiğinde (veya genel kelime eşleşmelerinde örn: biber -> kapya biber) doğru şekilde yeşil yanması sağlandı. -->
 <!DOCTYPE html>
 <html lang="tr" data-theme="dark">
 <head>
@@ -51,7 +52,6 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    /* AÇILIŞ YÜKLENME EKRANI (SPLASH SCREEN) */
     #splashScreen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: var(--bg); display: flex; flex-direction: column;
@@ -205,7 +205,6 @@
 </head>
 <body>
 
-  <!-- YÜKLENME EKRANI & ÖZEL LOGO -->
   <div id="splashScreen">
     <div class="splash-logo-container">
       <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);">
@@ -216,7 +215,7 @@
     <div class="spinner"></div>
   </div>
 
-  <div class="version-badge">v2.6</div>
+  <div class="version-badge">v2.7</div>
   <button class="theme-toggle-btn" id="themeBtn" onclick="temaDegistir()">☀️ Açık Mod</button>
   <div class="bg-hearts" id="bgHearts"></div>
 
@@ -543,7 +542,6 @@
       dolapGetir(); tarifleriGetir();
     }
 
-    function tarifModalAc() { document.getElementById('tarifModal').classList.add('hidden') || document.getElementById('tarifModal').classList.remove('hidden'); }
     function tarifModalAc() { document.getElementById('tarifModal').classList.remove('hidden'); }
     function tarifModalKapat() {
       document.getElementById('tarifModal').classList.add('hidden');
@@ -571,7 +569,6 @@
       tarifleriGetir();
     }
 
-    // GELİŞTİRİLMİŞ AKILLI EŞLEŞTİRME (ÇİFT KATMANLI KONTROL)
     function metniTemizle(metin) {
       if (!metin) return '';
       return metin.toLowerCase()
@@ -579,7 +576,7 @@
         .replace(/ç/g, 'c').replace(/ğ/g, 'g')
         .replace(/ı/g, 'i').replace(/ö/g, 'o')
         .replace(/ş/g, 's').replace(/ü/g, 'u')
-        .replace(/[^a-z0-9]/g, ' ') // Sadece harf ve rakamları bırak, diğer işaretleri boşluk yap
+        .replace(/[^a-z0-9]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
     }
@@ -589,7 +586,18 @@
       if (!_supabase) return;
       const { data: dolapData } = await _supabase.from('dolaptakiler').select('malzeme_adi');
       
-      const evdekiMalzemeler = dolapData ? dolapData.map(d => metniTemizle(d.malzeme_adi)) : [];
+      // Dolaptaki malzemelerin kelimelerini ayrı ayrı da diziye atıyoruz (Örn: "kapya biber" -> ["kapya", "biber"])
+      let evdekiKelimelerListesi = [];
+      if (dolapData) {
+        dolapData.forEach(d => {
+          let temizDolap = metniTemizle(d.malzeme_adi);
+          evdekiKelimelerListesi.push(temizDolap);
+           temizDolap.split(' ').forEach(kelime => {
+            if (kelime.length > 2) evdekiKelimelerListesi.push(kelime); // Kısa ekleri eleyip ana kelimeleri alıyoruz
+          });
+        });
+      }
+
       const { data: tarifler } = await _supabase.from('tarifler1').select('*');
       
       if (!tarifler || tarifler.length === 0) {
@@ -605,13 +613,16 @@
           let ham = m.trim();
           if (!ham) return;
           let safTarif = metniTemizle(ham);
-          
-          // Eşleşme testi: Tam eşleşme, içinde geçme veya göğsü/göğüsü esnekliği
-          let varMi = evdekiMalzemeler.some(evde => {
-            return evde === safTarif || 
-                   evde.includes(safTarif) || 
-                   safTarif.includes(evde) ||
-                   (evde.replace(/u$/, '') === safTarif.replace(/u$/, ''));
+          let tarifKelimeleri = safTarif.split(' ').filter(k => k.length > 2);
+
+          // İKİ YÖNLÜ VE KELİME BAZLI AKILLI EŞLEŞTİRME KONTROLÜ
+          let varMi = evdekiKelimelerListesi.some(evde => {
+            if (!evde) return false;
+            // 1. Durum: Tam eşleşme veya birbirini içerme
+            if (evde === safTarif || safTarif.includes(evde) || evde.includes(safTarif)) return true;
+            
+            // 2. Durum: Kelime bazlı kesişim (Örn: dolapta "biber" var, tarifte "kapya biber" geçiyor veya tam tersi)
+            return tarifKelimeleri.some(tk => evde.includes(tk) || tk.includes(evde));
           });
 
           if (varMi) {
