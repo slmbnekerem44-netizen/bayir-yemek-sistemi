@@ -32,6 +32,31 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Arka Plan Uçuşan Bol Kalpler */
+    .bg-hearts {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -50px;
+      color: rgba(239, 68, 68, 0.35);
+      font-size: 20px;
+      animation: floatUp 6s linear infinite;
+      user-select: none;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-105vh) rotate(360deg); opacity: 0; }
     }
 
     .container {
@@ -117,6 +142,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Arka Planda Uçuşan Bol Kalpler -->
+  <div class="bg-hearts" id="bgHearts"></div>
 
   <div class="container">
     <!-- Giriş Ekranı -->
@@ -204,8 +232,25 @@
     let kayitliSifreVarMi = false;
 
     window.onload = () => {
+      kalpUret();
       if (aktifKullanici) ekraniGuncelle();
     };
+
+    // Arka Planda Bol Kalp Üretme Fonksiyonu
+    function kalpUret() {
+      const container = document.getElementById('bgHearts');
+      const simgeler = ['❤️', '💖', '💘', '💓', '💕', '💗'];
+      setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerText = simgeler[Math.floor(Math.random() * simgeler.length)];
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        heart.style.fontSize = (Math.random() * 16 + 14) + 'px';
+        container.appendChild(heart);
+        setTimeout(() => heart.remove(), 7000);
+      }, 400);
+    }
 
     async function kullaniciSecildi() {
       const u = document.getElementById('userSelect').value;
@@ -224,9 +269,11 @@
 
       if (data && data.sifre) {
         kayitliSifreVarMi = true;
+        pinLabel.style.color = 'var(--text-muted)';
         pinLabel.innerText = `${u}, Şifrenizi Girin`;
       } else {
         kayitliSifreVarMi = false;
+        pinLabel.style.color = 'var(--text-muted)';
         pinLabel.innerText = `${u}, İlk Giriş: Yeni Şifre Belirleyin`;
       }
     }
@@ -250,11 +297,13 @@
 
     async function sifreIslemiYap() {
       const u = document.getElementById('userSelect').value;
+      const pinLabel = document.getElementById('pinLabel');
       let sifre = '';
       document.querySelectorAll('.pin-box').forEach(box => sifre += box.value);
 
       if (sifre.length < 6) {
-        alert("Lütfen 6 haneli şifreyi eksiksiz doldurun!");
+        pinLabel.style.color = 'var(--danger)';
+        pinLabel.innerText = '❌ Lütfen 6 haneli şifreyi eksiksiz doldurun!';
         return;
       }
 
@@ -263,16 +312,19 @@
         if (data && data.sifre === sifre) {
           basariliGiris(u);
         } else {
-          alert("Hatalı şifre!");
+          pinLabel.style.color = 'var(--danger)';
+          pinLabel.innerText = '❌ Hatalı şifre!';
           pinTemizle();
         }
       } else {
         const { error } = await _supabase.from('kullanicilar').insert([{ kullanici_adi: u, sifre: sifre }]);
         if (error) {
-          alert("Şifre kaydedilirken hata oluştu: " + error.message);
+          pinLabel.style.color = 'var(--danger)';
+          pinLabel.innerText = '❌ Hata: ' + error.message;
         } else {
-          alert("Şifreniz başarıyla oluşturuldu!");
-          basariliGiris(u);
+          pinLabel.style.color = 'var(--success)';
+          pinLabel.innerText = '✅ Şifreniz başarıyla oluşturuldu!';
+          setTimeout(() => basariliGiris(u), 800);
         }
       }
     }
@@ -333,7 +385,6 @@
       let evetler = data.evet_oylar || [];
       let hayirlar = data.hayir_oylar || [];
 
-      // Eskiden verdiği oyları temizle
       evetler = evetler.filter(k => k !== aktifKullanici);
       hayirlar = hayirlar.filter(k => k !== aktifKullanici);
 
@@ -413,7 +464,10 @@
       const ad = document.getElementById('tarifAdi').value.trim();
       const url = document.getElementById('reelsUrl').value.trim();
       const malzText = document.getElementById('tarifMalzemeler').value.trim();
-      if (!ad || !malzText) return alert("Tarif adı ve malzemeleri boş bırakılamaz!");
+      if (!ad || !malzText) {
+        alert("Tarif adı ve malzemeleri boş bırakılamaz!");
+        return;
+      }
       const malzemeler = malzText.split(',').map(m => m.trim());
       await _supabase.from('tarifler').insert([{
         tarif_adi: ad,
