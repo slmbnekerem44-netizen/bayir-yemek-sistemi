@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bayır Ailesi Yemek & Tarif Sistemi</title>
+  <title>❤️ Bayır Ailesi Yemek & Tarif Sistemi ❤️</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -90,6 +90,7 @@
     button.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .btn-green { background: var(--success); }
+    .btn-red { background: var(--danger); }
     .hidden { display: none !important; }
 
     .poll-card {
@@ -120,13 +121,13 @@
   <div class="container">
     <!-- Giriş Ekranı -->
     <div id="loginScreen" class="card">
-      <h2 id="loginTitle">❤️ Bayır Ailesi Girişi</h2>
+      <h2>❤️ Bayır Ailesi Girişi ❤️</h2>
       <select id="userSelect" onchange="kullaniciSecildi()">
         <option value="">Kullanıcı Seçiniz...</option>
-        <option value="Baba">Baba</option>
-        <option value="Anne">Anne</option>
-        <option value="Kerem">Kerem</option>
-        <option value="Abi">Abi</option>
+        <option value="Hülya">❤️ Hülya</option>
+        <option value="Berat">❤️ Berat</option>
+        <option value="Doğukan">❤️ Doğukan</option>
+        <option value="Kerem">❤️ Kerem</option>
       </select>
 
       <div id="pinArea" class="hidden">
@@ -219,7 +220,7 @@
       pinArea.classList.remove('hidden');
       pinTemizle();
 
-      const { data, error } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).single();
+      const { data } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).single();
 
       if (data && data.sifre) {
         kayitliSifreVarMi = true;
@@ -291,7 +292,7 @@
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
       document.getElementById('bottomNav').classList.remove('hidden');
-      document.getElementById('userInfo').innerText = '👤 ' + aktifKullanici;
+      document.getElementById('userInfo').innerText = '❤️ ' + aktifKullanici;
       oylamaGetir();
       dolapGetir();
       tarifleriGetir();
@@ -311,18 +312,81 @@
       }
     }
 
+    async function yemekOner() {
+      const val = document.getElementById('mainFood').value.trim();
+      if (!val) return;
+      await _supabase.from('yemek_secimi').insert([{ 
+        onerilen_yemek: val, 
+        oneren_kisi: aktifKullanici, 
+        durum: 'Oylamada',
+        evet_oylar: [],
+        hayir_oylar: []
+      }]);
+      document.getElementById('mainFood').value = '';
+      oylamaGetir();
+    }
+
+    async function oyVer(yemekId, tip) {
+      const { data } = await _supabase.from('yemek_secimi').select('*').eq('id', yemekId).single();
+      if (!data) return;
+
+      let evetler = data.evet_oylar || [];
+      let hayirlar = data.hayir_oylar || [];
+
+      // Eskiden verdiği oyları temizle
+      evetler = evetler.filter(k => k !== aktifKullanici);
+      hayirlar = hayirlar.filter(k => k !== aktifKullanici);
+
+      if (tip === 'evet') evetler.push(aktifKullanici);
+      if (tip === 'hayir') hayirlar.push(aktifKullanici);
+
+      await _supabase.from('yemek_secimi').update({
+        evet_oylar: evetler,
+        hayir_oylar: hayirlar
+      }).eq('id', yemekId);
+
+      oylamaGetir();
+    }
+
+    async function oylamaGetir() {
+      const alan = document.getElementById('voteArea');
+      const { data } = await _supabase.from('yemek_secimi').select('*');
+      if (!data || data.length === 0) {
+        alan.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Aktif oylama yok.</p>";
+        return;
+      }
+
+      alan.innerHTML = data.map(d => {
+        const evetler = d.evet_oylar || [];
+        const hayirlar = d.hayir_oylar || [];
+        const evetVerdi = evetler.includes(aktifKullanici);
+        const hayirVerdi = hayirlar.includes(aktifKullanici);
+
+        return `
+          <div class="poll-card">
+            <strong style="font-size: 16px;">${d.onerilen_yemek}</strong> <span style="font-size:12px; color:var(--text-muted);">(${d.oneren_kisi})</span><br>
+            <div style="margin: 10px 0; font-size: 13px;">
+              👍 Evet (${evetler.length}): <span style="color:var(--success);">${evetler.join(', ') || 'Yok'}</span><br>
+              👎 Hayır (${hayirlar.length}): <span style="color:var(--danger);">${hayirlar.join(', ') || 'Yok'}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="oyVer(${d.id}, 'evet')" class="action-btn ${evetVerdi ? 'btn-green' : ''}" style="padding: 8px; font-size: 12px; background: ${evetVerdi ? 'var(--success)' : '#334155'}">👍 Evet</button>
+              <button onclick="oyVer(${d.id}, 'hayir')" class="action-btn ${hayirVerdi ? 'btn-red' : ''}" style="padding: 8px; font-size: 12px; background: ${hayirVerdi ? 'var(--danger)' : '#334155'}">👎 Hayır</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     async function manuelMalzemeEkle() {
       const val = document.getElementById('manuelMalzeme').value.trim();
       if (!val) return;
-
       const liste = val.split(',').map(m => m.trim());
       const eklenecekler = liste.filter(i => i).map(item => ({
         malzeme_adi: item.toUpperCase(),
         ekleyen_kisi: aktifKullanici
       }));
-
       await _supabase.from('dolaptakiler').insert(eklenecekler);
-
       document.getElementById('manuelMalzeme').value = '';
       dolapGetir();
       tarifleriGetir();
@@ -331,81 +395,61 @@
     async function dolapGetir() {
       const { data } = await _supabase.from('dolaptakiler').select('*');
       const el = document.getElementById('dolapListesi');
-
       if (!data || data.length === 0) {
         el.innerHTML = "<em style='color:var(--text-muted); font-size:12px;'>Dolap boş.</em>";
         return;
       }
-
       el.innerHTML = data.map(d => `<span class="ingredient-badge badge-has">✓ ${d.malzeme_adi}</span>`).join(' ');
     }
 
     async function dolabiBosalt() {
       if (!confirm("Dolaptaki TÜM malzemeleri silmek istediğinden emin misin?")) return;
-
-      const { error } = await _supabase.from('dolaptakiler').delete().neq('id', 0);
-
-      if (error) {
-        alert("Silinirken hata oluştu: " + error.message);
-      } else {
-        alert("Dolap başarıyla boşaltıldı!");
-        dolapGetir();
-        tarifleriGetir();
-      }
+      await _supabase.from('dolaptakiler').delete().neq('id', 0);
+      dolapGetir();
+      tarifleriGetir();
     }
 
     async function tarifKaydet() {
       const ad = document.getElementById('tarifAdi').value.trim();
       const url = document.getElementById('reelsUrl').value.trim();
       const malzText = document.getElementById('tarifMalzemeler').value.trim();
-
       if (!ad || !malzText) return alert("Tarif adı ve malzemeleri boş bırakılamaz!");
-
       const malzemeler = malzText.split(',').map(m => m.trim());
-
       await _supabase.from('tarifler').insert([{
         tarif_adi: ad,
         reels_link: url,
         malzemeler: malzemeler,
         ekleyen_kisi: aktifKullanici
       }]);
-
       document.getElementById('tarifAdi').value = '';
       document.getElementById('reelsUrl').value = '';
       document.getElementById('tarifMalzemeler').value = '';
-
       tarifleriGetir();
     }
 
     async function tarifleriGetir() {
       const { data: dolapData } = await _supabase.from('dolaptakiler').select('malzeme_adi');
       const evdekiMalzemeler = dolapData ? dolapData.map(d => d.malzeme_adi.toLowerCase()) : [];
-
       const { data: tarifler } = await _supabase.from('tarifler').select('*');
       const area = document.getElementById('tariflerListesi');
-
       if (!tarifler || tarifler.length === 0) {
         area.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Henüz kayıtlı tarif yok.</p>";
         return;
       }
-
       let html = '';
       tarifler.forEach(t => {
         let malzemeHTML = '';
         let gerekliler = t.malzemeler || [];
         if (typeof gerekliler === 'string') gerekliler = gerekliler.split(',');
-
         gerekliler.forEach(m => {
           const temizM = m.trim().toLowerCase();
           const varMi = evdekiMalzemeler.some(evde => evde.includes(temizM) || temizM.includes(evde));
-          
           if (varMi) {
             malzemeHTML += `<span class="ingredient-badge badge-has">✓ ${m.trim()}</span> `;
           } else {
             malzemeHTML += `<span class="ingredient-badge badge-missing">✕ ${m.trim()}</span> `;
           }
         });
-
         html += `
           <div class="poll-card">
             <h4 style="margin:0 0 6px 0;">${t.tarif_adi}</h4>
@@ -417,31 +461,7 @@
           </div>
         `;
       });
-
       area.innerHTML = html;
-    }
-
-    async function yemekOner() {
-      const val = document.getElementById('mainFood').value.trim();
-      if (!val) return;
-      await _supabase.from('yemek_secimi').insert([{ onerilen_yemek: val, oneren_kisi: aktifKullanici, durum: 'Oylanıyor' }]);
-      document.getElementById('mainFood').value = '';
-      oylamaGetir();
-    }
-
-    async function oylamaGetir() {
-      const alan = document.getElementById('voteArea');
-      const { data } = await _supabase.from('yemek_secimi').select('*');
-      if (!data || data.length === 0) {
-        alan.innerHTML = "<p style='color:var(--text-muted); font-size:13px;'>Aktif oylama yok.</p>";
-        return;
-      }
-      alan.innerHTML = data.map(d => `
-        <div class="poll-card">
-          <strong>${d.onerilen_yemek}</strong> (${d.oneren_kisi})<br>
-          <small>Durum: ${d.durum}</small>
-        </div>
-      `).join('');
     }
   </script>
 </body>
