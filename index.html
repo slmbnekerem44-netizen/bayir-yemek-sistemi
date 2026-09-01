@@ -54,6 +54,33 @@
       color: var(--text); font-size: 14px; outline: none; font-family: inherit;
     }
 
+    /* Modern Kutucuklu PIN Girişi */
+    .pin-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .pin-box {
+      width: 45px;
+      height: 55px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
+      color: var(--text);
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .pin-box:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    }
+
     button.action-btn {
       width: 100%; padding: 12px; border-radius: 12px; border: none;
       background: var(--primary); color: white; font-weight: 600; font-size: 14px;
@@ -91,19 +118,32 @@
 <body>
 
   <div class="container">
+    <!-- Giriş Ekranı -->
     <div id="loginScreen" class="card">
-      <h2>❤️ Bayır Ailesi Girişi</h2>
-      <select id="userSelect">
+      <h2 id="loginTitle">❤️ Bayır Ailesi Girişi</h2>
+      <select id="userSelect" onchange="kullaniciSecildi()">
         <option value="">Kullanıcı Seçiniz...</option>
         <option value="Baba">Baba</option>
         <option value="Anne">Anne</option>
         <option value="Kerem">Kerem</option>
         <option value="Abi">Abi</option>
       </select>
-      <input type="password" id="passInput" placeholder="Şifre (1234)">
-      <button class="action-btn" onclick="girisYap()">Giriş Yap</button>
+
+      <div id="pinArea" class="hidden">
+        <p id="pinLabel" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">6 Haneli Şifrenizi Girin</p>
+        <div class="pin-container">
+          <input type="password" maxlength="1" class="pin-box" oninput="sonrakiInput(this, 0)" onkeydown="geriTusu(event, 0)">
+          <input type="password" maxlength="1" class="pin-box" oninput="sonrakiInput(this, 1)" onkeydown="geriTusu(event, 1)">
+          <input type="password" maxlength="1" class="pin-box" oninput="sonrakiInput(this, 2)" onkeydown="geriTusu(event, 2)">
+          <input type="password" maxlength="1" class="pin-box" oninput="sonrakiInput(this, 3)" onkeydown="geriTusu(event, 3)">
+          <input type="password" maxlength="1" class="pin-box" oninput="sonrakiInput(this, 4)" onkeydown="geriTusu(event, 4)">
+          <input type="password" maxlength="1" class="pin-box" oninput="sonrakiInput(this, 5)" onkeydown="geriTusu(event, 5)">
+        </div>
+        <button class="action-btn btn-green" onclick="sifreIslemiYap()">Devam Et</button>
+      </div>
     </div>
 
+    <!-- Ana Uygulama Ekranı -->
     <div id="appScreen" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <span id="userInfo" style="font-weight:700; color:#38bdf8;"></span>
@@ -159,21 +199,87 @@
     const SUPABASE_KEY = 'sb_publishable_fzLprz7OMs8hCJC4l-qmAw_gSBTcL-b';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const SIFRELER = { "Baba": "1234", "Anne": "1234", "Kerem": "1234", "Abi": "1234" };
     let aktifKullanici = localStorage.getItem('bayir_user') || null;
+    let kayitliSifreVarMi = false;
 
     window.onload = () => {
       if (aktifKullanici) ekraniGuncelle();
     };
 
-    function girisYap() {
+    async function kullaniciSecildi() {
       const u = document.getElementById('userSelect').value;
-      const p = document.getElementById('passInput').value;
-      if (SIFRELER[u] && SIFRELER[u] === p) {
-        aktifKullanici = u;
-        localStorage.setItem('bayir_user', u);
-        ekraniGuncelle();
-      } else alert("Hatalı Şifre veya Kullanıcı!");
+      const pinArea = document.getElementById('pinArea');
+      const pinLabel = document.getElementById('pinLabel');
+
+      if (!u) {
+        pinArea.classList.add('hidden');
+        return;
+      }
+
+      pinArea.classList.remove('hidden');
+      pinTemizle();
+
+      const { data, error } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).single();
+
+      if (data && data.sifre) {
+        kayitliSifreVarMi = true;
+        pinLabel.innerText = `${u}, Şifrenizi Girin`;
+      } else {
+        kayitliSifreVarMi = false;
+        pinLabel.innerText = `${u}, İlk Giriş: Yeni Şifre Belirleyin`;
+      }
+    }
+
+    function sonrakiInput(el, index) {
+      if (el.value.length === 1 && index < 5) {
+        document.querySelectorAll('.pin-box')[index + 1].focus();
+      }
+    }
+
+    function geriTusu(event, index) {
+      if (event.key === 'Backspace' && index > 0 && !event.target.value) {
+        document.querySelectorAll('.pin-box')[index - 1].focus();
+      }
+    }
+
+    function pinTemizle() {
+      document.querySelectorAll('.pin-box').forEach(box => box.value = '');
+      document.querySelectorAll('.pin-box')[0].focus();
+    }
+
+    async function sifreIslemiYap() {
+      const u = document.getElementById('userSelect').value;
+      let sifre = '';
+      document.querySelectorAll('.pin-box').forEach(box => sifre += box.value);
+
+      if (sifre.length < 6) {
+        alert("Lütfen 6 haneli şifreyi eksiksiz doldurun!");
+        return;
+      }
+
+      if (kayitliSifreVarMi) {
+        const { data } = await _supabase.from('kullanicilar').select('sifre').eq('kullanici_adi', u).single();
+        if (data && data.sifre === sifre) {
+          basariliGiris(u);
+        } else {
+          alert("Hatalı şifre!");
+          pinTemizle();
+        }
+      } else {
+        const { error } = await _supabase.from('kullanicilar').insert([{ kullanici_adi: u, sifre: sifre }]);
+        if (error) {
+          alert("Şifre kaydedilirken hata oluştu: " + error.message);
+        } else {
+          alert("Şifreniz başarıyla oluşturuldu!");
+          basariliGiris(u);
+        }
+      }
+    }
+
+    function basariliGiris(u) {
+      aktifKullanici = u;
+      localStorage.setItem('bayir_user', u);
+      ekraniGuncelle();
     }
 
     function cikisYap() {
